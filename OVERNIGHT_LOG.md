@@ -166,3 +166,78 @@ table), `outputs/table_phase1_top_patterns_HLA_{B,C}.csv`,
 Committed to git after this phase.
 
 ---
+
+## Phase 2 — HLA-B/C tumor-vs-normal
+
+Script: `phase2_bc_headline.py` (new). Runs the exact same headline
+(Fisher + Wilson CI + OR + Haldane-Anscombe correction), per-allele
+(min_allele_samples=20), and detailed/volcano (min_carriers=3, BH-FDR)
+comparisons `analyze_brca.py` runs for A, pointed at HLA-B/C, with the
+standard (unflipped) classifier for both genes per Phase 1's finding. Also
+re-ran the constitutive-artifact (A\*11:01-style) check independently within
+this script (not just trusting Phase 1's numbers) as the `--exclude-alleles`
+equivalent — **0 alleles flagged for either gene**, so no allele exclusions
+were applied to either gene's headline/per-allele comparison.
+
+**Bug caught and fixed before results were trusted:** `analyze_brca.py`'s
+`plot_per_allele()`/`plot_volcano()` always write to the fixed filenames
+`<outdir>/fig_per_allele.pdf` / `<outdir>/fig_volcano.pdf`. First draft of
+this script called them with `OUTDIR` directly (outputs/) and renamed
+afterwards — which clobbered/mislabeled HLA-A's own canonical
+`outputs/fig_per_allele.pdf` and `outputs/fig_volcano.pdf` (deleted them, and
+in one case relabeled HLA-A's original volcano plot as
+`UNVALIDATED_HLA_B_fig_volcano.pdf`, since HLA-B produces no volcano data of
+its own and the rename silently picked up the stale HLA-A file sitting at
+the default path). Caught by diffing outputs/ against the Phase 1 git commit
+before trusting anything downstream. Fixed by routing both plot calls
+through an isolated `outputs/_phase2_scratch/` directory and moving the
+result into the gene-tagged filename, then verified byte-for-byte
+(`md5`) that `outputs/fig_per_allele.pdf` / `outputs/fig_volcano.pdf` match
+the Phase 1 commit exactly after the fix. **Flagging this prominently below
+in TOP THINGS TO REVIEW** since it's exactly the kind of silent-clobber bug
+that's easy to miss in an unattended run — worth a spot-check that HLA-A's
+figures still look right.
+
+### HLA-C (presented)
+
+933 tumor / 106 normal, 60 candidate AS events (2 exon5_skip / 2
+intron5_retention normal; 1 exon5_skip / 54 intron5_retention / 1 other
+tumor, by row — not distinct carriers).
+
+| Event | Tumor | Normal | Fisher p | OR (95% CI) | Direction |
+|---|---|---|---|---|---|
+| exon5_skip | 0.1% (1/933, CI 0.0–0.6%) | 0.9% (1/106, CI 0.2–5.2%) | 0.194 | 0.11 (0.01–1.81) | depleted in tumor |
+| intron5_retention | 3.1% (29/933, CI 2.2–4.4%) | 0.9% (1/106, CI 0.2–5.2%) | 0.354 | 3.37 (0.45–24.98) | enriched in tumor |
+
+Both CIs cross 1 — **neither result is statistically confident**, same
+honesty rule as A. Note for the room: intron5_retention's *direction* here
+(enriched in tumor) is the same direction the MHC Hammer paper predicts,
+unlike A's BRCA result (which trended the opposite way) — but with only 1
+normal carrier total, this is an extremely fragile point estimate (CI runs
+0.45 to nearly 25x), not a replication. 0/4 tested per-pattern combinations
+survive BH-FDR q<0.05 in the detailed table. No allele shows a
+constitutive-artifact pattern, so nothing was excluded from these numbers.
+
+**Outputs:** `outputs/table_headline_classes_HLA-C.csv`,
+`outputs/fig_classes_HLA-C.pdf`, `outputs/table_per_allele_HLA-C.csv`,
+`outputs/fig_per_allele_HLA-C.pdf`,
+`outputs/results_BRCA_tumor_vs_normal_HLA-C.csv`,
+`outputs/table_volcano_HLA-C.csv`, `outputs/fig_volcano_HLA-C.pdf`,
+`outputs/table_penetrance_recheck_HLA-C.csv`.
+
+### HLA-B (quarantined — NOT FOR PRESENTATION)
+
+Computed for completeness/audit but **excluded from every presented
+document** per the quarantine rule (Phase 1 verdict: untrustworthy,
+insufficient data — only 2 candidate AS events in the whole cohort). Both
+headline classes show 0-1 total carriers combined tumor+normal — there is
+essentially nothing here to report either way, which is itself consistent
+with "not enough signal to say anything," not a null result worth stating
+confidently. All outputs prefixed `outputs/UNVALIDATED_HLA_B_*`, with
+`outputs/UNVALIDATED_HLA_B_README.md` explaining the quarantine and what
+would need to happen (manual strand/reference review) before these numbers
+could ever be presented.
+
+Committed to git after this phase.
+
+---
