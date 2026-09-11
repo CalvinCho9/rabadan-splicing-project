@@ -1,0 +1,7 @@
+Contig_rd,Top_AS_pattern,Top_event_class,Cohort,Carriers,N_samples,Pct
+hla_b_38_01,2222_2793->2222_3315,exon5_skip,NORMAL,0,14,0.0
+hla_b_38_01,2222_2793->2222_3315,exon5_skip,TCGA-CHOL,0,1,0.0
+hla_b_38_01,2222_2793->2222_3315,exon5_skip,TCGA-HNSC,0,2,0.0
+hla_b_38_01,2222_2793->2222_3315,exon5_skip,TCGA-KIRC,1,4,25.0
+hla_b_38_01,2222_2793->2222_3315,exon5_skip,TCGA-LGG,0,1,0.0
+hla_b_38_01,2222_2793->2222_3315,exon5_skip,TCGA-UCEC,0,4,0.0

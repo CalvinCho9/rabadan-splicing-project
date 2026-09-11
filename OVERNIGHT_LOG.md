@@ -241,3 +241,74 @@ could ever be presented.
 Committed to git after this phase.
 
 ---
+
+## Phase 3 — pan-cancer descriptive pass
+
+Script: `phase3_pancancer_descriptive.py` (new). Descriptive only, as
+instructed — no tumor-vs-normal test anywhere in this phase. The `NORMAL`
+cohort in these files is a separate cross-cohort normal-tissue pool, not
+matched normals per cancer type, so even cohorts with both `tumor` and
+`normal` rows present are not treated as a paired comparison.
+
+**BRCA_NORMAL handling:** excluded the mislabeled `Cohort=="BRCA_NORMAL"`
+block from both pan_HLA-B/C files entirely (3,101 / 2,618 rows respectively)
+rather than trust or silently fix the `Type=="tumor"` label — logged in
+Pre-flight above. No information is lost: BRCA is already covered correctly
+by Phase 2's dedicated export files.
+
+**Quarantine applied at the gene level**, per the "when in doubt, quarantine"
+rule — HLA-B's entire Phase 3 output goes to
+`outputs/UNVALIDATED_HLA_B_pancancer_*`, even though the per-cohort
+penetrance check itself doesn't use the exon5_skip/intron5_retention
+classifier (it's AS_pattern-based, same as Phase 1's). Decided this way for
+simplicity/safety rather than carving out a classifier-independent
+exception — HLA-B's data is sparse pan-cancer too (620 samples, only 2
+candidate AS events total, one allele reaches the 10-sample bar and shows
+no real signal), so there's nothing being lost by quarantining it wholesale.
+
+**Headline finding — A\*11:01's constitutive isoform generalizes beyond
+BRCA.** Tested whether the specific junction established as constitutive in
+BRCA (`2365_2806->2383_2806`, `ANNOTATION_ARTIFACT_NOTE.md`) recurs in other
+cohorts. It does, strongly: **NORMAL pool 20/20 (100%), TCGA-CHOL 3/3
+(100%), TCGA-LGG 6/7 (85.7%)** — only TCGA-HNSC is an outlier (1/3, but n=3
+is too small to weigh against the other three). Pooled: 30/33 (91%) of
+pan-cancer A\*11:01 carriers show the pattern. This is a genuinely useful
+strengthening of the existing A\*11:01 finding — it's a fixed property of
+the allele's reference transcript across tissue/cancer types, not a
+BRCA-cohort quirk. TCGA-KIRC and TCGA-UCEC had 0 A\*11:01 carriers to test
+(this cohort's allele frequency spectrum apparently doesn't include A*11:01
+much, or samples are too few — not investigated further).
+
+**HLA-A general cross-cohort scan:** besides A\*11:01, the broader per-allele
+penetrance-by-cohort table (alleles with >=10 pan-cancer samples) found 3
+(allele, cohort) combinations at >=80% penetrance — all of them are, in
+fact, A\*11:01 itself in different cohorts (NORMAL/CHOL/LGG, the same 3
+cohorts as above) — i.e. this scan independently rediscovers the same
+signal rather than turning up a second constitutive allele. No other A
+allele showed a similar pattern.
+
+**HLA-C:** no (allele, cohort) combination reaches 80% penetrance pan-cancer
+(max observed 50%, on n=2 — noise). Consistent with Phase 1/2's BRCA-only
+finding that no C allele looks constitutive. `hla_c_03_04`'s intron5_retention
+pattern (the same one flagged as `real_variable_splicing_candidate` in
+Phase 1/2) shows modest, variable penetrance across cohorts (0-21%) — looks
+like real, biologically variable splicing wherever it's seen, not an
+artifact, consistent with the BRCA-only read.
+
+**HLA-B (quarantined):** essentially no signal pan-cancer either (2
+candidate events total across 620 samples) — consistent with the Phase 1
+finding that this gene just doesn't produce detectable AS events at the
+10%-local-rate threshold in this data, not specific to BRCA.
+
+**Outputs:** `outputs/PHASE3_pancancer_descriptive.md`,
+`outputs/table_phase3_cohort_overview_HLA-{A,C}.csv`,
+`outputs/table_phase3_allele_penetrance_by_cohort_HLA-{A,C}.csv`,
+`outputs/table_phase3_A11_01_cross_cohort.csv`,
+`outputs/UNVALIDATED_HLA_B_pancancer_*.csv`.
+
+Verified HLA-A's canonical outputs/ files remain untouched (git status shows
+zero deletions) before committing.
+
+Committed to git after this phase.
+
+---
