@@ -312,3 +312,115 @@ zero deletions) before committing.
 Committed to git after this phase.
 
 ---
+
+## Phase 4 — consolidation
+
+Updated `RESULTS_SUMMARY.md` (added Finding 4: HLA-C headline test, same
+honest-null treatment as HLA-A; Finding 5: A\*11:01 pan-cancer
+generalization; updated Bottom line; added a gene-coverage note up top
+making the HLA-B quarantine explicit before anyone reads further) and
+`PRESENTATION_NOTES.md` (added bullets 8-10 for HLA-C's headline result,
+the A\*11:01 pan-cancer finding, and an explicit "HLA-B: validation
+attempted, inconclusive" bullet so it's addressed proactively rather than
+left as a gap if asked live; updated Next Steps). Only HLA-C and the
+pan-cancer A\*11:01/HLA-C descriptive results were folded in, per the
+quarantine rule — no HLA-B number appears anywhere in either file.
+
+Rewrote `make_figures_overview.py` to a two-gene, five-panel layout (A1/A2:
+HLA-A and HLA-C headline classes; B: HLA-A per-allele constitutive-artifact
+contrast, unchanged; C: combined HLA-A+HLA-C volcano; D: new panel, the
+A*11:01 pan-cancer recurrence bar chart) and regenerated
+`figures_overview.pdf`. Titled explicitly as an HLA-A/HLA-C figure with
+HLA-B's absence called out in the suptitle and panel C's caption, rather
+than silently omitting it. Rendered a PNG preview before finalizing to
+visually confirm the layout wasn't broken (all 4 subplot groups legible,
+labels not overlapping) — see the preview check before the final
+`figures_overview.pdf` write in this session's tool history.
+
+Wrote `outputs/FINAL_REVIEW.md`: one paragraph per gene, each claim tagged
+real/null/artifact/underpowered/quarantined, plus its own "TOP THINGS TO
+REVIEW" list (6 items, focused on what a reader of that specific file needs
+to double-check).
+
+Lightly updated `README_FOR_CLAUDE.md` (data file list, script list, running
+order, write-up section) so it stays an accurate entry point for reproducing
+everything — not explicitly required by the brief but it's the project's
+canonical map and leaving it silently stale after adding 4 new scripts and
+~2 dozen new output files seemed like the wrong kind of shortcut.
+
+Final verification before this commit: re-diffed `outputs/fig_per_allele.pdf`
+and `outputs/fig_volcano.pdf` (HLA-A's originals) against the Phase 1 git
+commit — still byte-identical (`md5` match). Confirmed no `git status`
+deletions anywhere under `outputs/`, `RESULTS_SUMMARY.md`, or
+`PRESENTATION_NOTES.md` (only additions/new files).
+
+Committed to git after this phase.
+
+---
+
+## TOP THINGS TO REVIEW
+
+Ranked most-likely-to-be-wrong first. (A shorter, gene-organized version of
+this same list is also in `outputs/FINAL_REVIEW.md`.)
+
+1. **The whole HLA-C validation rests on an inference about the upstream
+   alignment pipeline that this repo can't confirm.** Phase 1 empirically
+   rejected the strand-flip hypothesis for HLA-C (flipping destroyed a
+   coherent signal; naive classification produced one), then explained
+   *why* with an inference — "the personalized reference contigs were
+   probably already reverse-complemented at construction time" — that was
+   never checked against the actual reference-construction code (outside
+   this repo). The empirical result (naive > flipped) is solid; the
+   causal story for *why* is a plausible guess. If that guess is wrong,
+   HLA-C's classifier could still be behaving correctly for the wrong
+   reason, or there could be a third explanation not considered. **Worth a
+   5-minute check with whoever built the personalized HLA-B/C references
+   before this goes beyond a lab meeting.**
+2. **HLA-B's near-total absence of detectable splicing signal is
+   unexplained.** Confirmed it's not a script bug (checked the raw
+   Local_rate distribution directly — the ceiling really is ~12.6% vs
+   52-60% for A/C), but whether that reflects real biology or a technical/
+   reference-quality problem specific to HLA-B was explicitly left open.
+   This is the reason HLA-B is quarantined at all — resolving it either
+   validates HLA-B for a future pass or turns into its own finding.
+3. **A mid-run bug (Phase 2) would have silently corrupted HLA-A's own
+   canonical figures** (`outputs/fig_per_allele.pdf`, `outputs/fig_volcano.pdf`)
+   by deleting or mislabeling them with B/C data, due to
+   `analyze_brca.py`'s plotting functions writing to fixed filenames. Caught
+   by diffing against the Phase 1 git commit rather than assuming success,
+   fixed with an isolated scratch directory, and re-verified byte-identical
+   after every subsequent phase. Flagging because it's exactly the kind of
+   thing that's easy to miss when running unattended — worth a human glance
+   at those two files to confirm they still look like the familiar
+   single-gene HLA-A figures.
+4. **The pan-cancer `BRCA_NORMAL`/`Type=tumor` mislabeling was worked
+   around, not fixed at the source.** If this export is reused elsewhere
+   without reading this project's notes, someone will silently double-count
+   106-108 real BRCA normal samples as tumor. Worth a note to whoever
+   maintains that export pipeline.
+5. **Every tumor-vs-normal number in this entire project (HLA-A and HLA-C
+   alike) is underpowered and none survive multiple-testing correction.**
+   Both `RESULTS_SUMMARY.md` and `PRESENTATION_NOTES.md` were written to
+   make this hard to drop accidentally in a live presentation, but it's
+   worth a deliberate reminder before presenting — especially HLA-C's
+   intron5_retention number, whose direction happens to match the MHC
+   Hammer paper's prediction and is therefore the single most tempting
+   number in the whole deck to overstate. It rests on n=1 on the normal
+   side.
+6. **The exclusion thresholds reused from HLA-A** (`min_allele_samples=20`,
+   `min_carriers=3`, `local_rate_threshold=0.1`, the 80%/5% penetrance
+   gates for the constitutive-artifact check) were applied to B/C
+   unchanged, without their own gene-specific sensitivity sweep (Phase 1/2
+   scope didn't include re-running `additional_analyses.py`'s
+   threshold-sensitivity sweep for B/C — only HLA-A's original sweep from
+   the prior session covers this). If HLA-C's headline numbers need to
+   survive real scrutiny (not just a lab meeting), that sweep should be
+   extended to HLA-C before citing it further.
+7. **Phase 3's "3 (allele, cohort) combinations at >=80% penetrance"
+   headline for HLA-A** turned out, on inspection, to just be A\*11:01
+   itself in 3 different cohorts, not 3 independent constitutive alleles —
+   correctly caught and written up that way in
+   `outputs/PHASE3_pancancer_descriptive.md`/`RESULTS_SUMMARY.md`, but
+   flagging because a less careful read of just the summary count ("3
+   combinations flagged") could be misread as 3 separate findings if
+   someone skims only the number.

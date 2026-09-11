@@ -1,9 +1,16 @@
-# Presentation notes — HLA-A splicing, TCGA-BRCA
+# Presentation notes — HLA-A/C splicing, TCGA-BRCA + pan-cancer
 
 Talking points for the lab meeting. Each bullet: **claim** → supporting stat
 → honest caveat. Full detail in `RESULTS_SUMMARY.md`; slide panel in
 `figures_overview.pdf`; method/background reference sheet in
 `background_method.pdf` if the room needs the mechanics explained first.
+
+**Gene coverage: A and C only.** HLA-B's classifier could not be validated
+(Phase 1: only 2 candidate AS events in the whole BRCA cohort — nowhere near
+enough to test) and is quarantined out of every number below. If asked
+about HLA-B, the honest answer is "not enough signal in this data yet to
+say anything, still under review" — see `outputs/FINAL_REVIEW.md` /
+`OVERNIGHT_LOG.md` for the full reasoning, do not improvise a number.
 
 1. **The analysis generalizes past BRCA, by design, not by accident.**
    The same code (unmodified) ran against a separate multi-cohort file and
@@ -68,6 +75,37 @@ Talking points for the lab meeting. Each bullet: **claim** → supporting stat
    honestly as noise-consistent given the power ceiling, not as a
    disagreement with their conclusion.
 
+8. **HLA-C extends to a second gene, with the same honest-null result.**
+   933 tumor / 106 normal, classifier independently validated (see below).
+   exon5_skip 0.1% tumor vs 0.9% normal (Fisher p=0.19, OR 0.11, CI
+   0.01–1.81); intron5_retention 3.1% tumor vs 0.9% normal (Fisher p=0.35,
+   OR 3.37, CI 0.45–25.0). *Caveat:* both CIs cross 1 — not significant.
+   intron5_retention's direction here happens to match the paper's
+   prediction, but it rests on a single normal-side carrier — flag as
+   fragile, not a replication, if asked.
+
+9. **A\*11:01's constitutive isoform isn't a BRCA quirk — it recurs
+   pan-cancer.** Same junction, tested in every other cohort with A*11:01
+   carriers: NORMAL pool 20/20 (100%), TCGA-CHOL 3/3 (100%), TCGA-LGG 6/7
+   (85.7%); TCGA-HNSC 1/3 is the outlier but n=3 is too small to weigh
+   against the rest. Pooled: 30/33 (91%). *Caveat:* descriptive only — the
+   pan-cancer `NORMAL` cohort is a separate cross-cohort pool, not matched
+   normals per cancer type, so this strengthens the "constitutive, not
+   tumor-associated" read but isn't itself a new significance test.
+
+10. **HLA-B: validation attempted, inconclusive — quarantined, not
+    presented.** Ran the same strand/geometry validation used for C; HLA-B
+    simply doesn't produce enough alternative-splicing signal in this
+    cohort to test it (2 candidate events total, vs 60 for C and ~200+ for
+    A at the same threshold — max observed junction read-share was 12.6%,
+    barely above the 10% detection floor, vs 52–60% for A/C). *Caveat:*
+    this is presented as an open question, not a finding — could be real
+    biology (HLA-B genuinely less alternatively spliced here) or a
+    technical/reference-quality issue specific to B; not determined. If the
+    room asks for HLA-B numbers, the honest answer is "not yet — see
+    `outputs/UNVALIDATED_HLA_B_*` for what exists, but don't present it as
+    a result."
+
 ---
 
 ## Next steps / what would strengthen this
@@ -75,13 +113,21 @@ Talking points for the lab meeting. Each bullet: **claim** → supporting stat
 - **More normals.** 106 is the binding constraint on every CI and power
   number above — even a doubling would meaningfully tighten the
   intron5_retention estimate and raise achieved power well past the current
-  ~30%.
+  ~30%, for both A and C.
 - **Confirm the A\*11:01 isoform against the actual reference transcript**
   (not just inferred from read-share) — worth a manual look at that allele's
-  GTF/contig to settle whether it's a known, characterized minor isoform.
-- **Extend to HLA-B/C and the full pan-cancer file** once alignment finishes
-  for those — the pipeline (this repo, `analyze_brca.py` +
-  `additional_analyses.py`) needs no code changes, only new
-  `--tumor`/`--normal` file paths and a gene-appropriate re-check of the
-  exon5_skip/intron5_retention coordinate thresholds (already demonstrated
-  working unmodified on a second, non-BRCA multi-cohort file — Finding 1).
+  GTF/contig to settle whether it's a known, characterized minor isoform;
+  now doubly motivated given it recurs pan-cancer (bullet 9).
+- **Resolve HLA-B.** Two independent paths: (a) manually confirm with
+  whoever built the personalized HLA-B references whether the
+  reference-construction step for B matches C's (Phase 1 found C's
+  coordinates behave as already transcript-oriented, contradicting the
+  initial reverse-strand-flip hypothesis — worth confirming this applies to
+  B too, not just inferring it from C), and (b) investigate why HLA-B's
+  detectable-splicing ceiling is so much lower than A/C's in this cohort —
+  could reflect a real, interesting biological difference (stronger
+  purifying selection against alternative splicing at B?) worth its own
+  slide once explained, or a fixable data issue.
+- **The pan-cancer files' `BRCA_NORMAL` mislabeling** (see
+  `OVERNIGHT_LOG.md`) should be fixed at the export/upstream step, not
+  worked around per-analysis indefinitely.
