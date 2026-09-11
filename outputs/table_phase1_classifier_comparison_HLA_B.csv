@@ -1,0 +1,3 @@
+Contig_rd,AS_pattern,Strand,Barcode,Type,Event_class_naive,Event_class_flipped,Changed
+hla_b_27_05,1306_1746->1306_1956,2,TCGA-E9-A54X,tumor,exon5_skip,other,True
+hla_b_15_01,1305_1745->1305_1966,2,TCGA-E9-A54X,tumor,exon5_skip,other,True

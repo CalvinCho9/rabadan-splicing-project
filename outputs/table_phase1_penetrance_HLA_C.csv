@@ -1,0 +1,12 @@
+Contig_rd,Top_AS_pattern,Top_event_class,Tumor_carriers,Tumor_n,Tumor_pct,Normal_carriers,Normal_n,Normal_pct,Min_group_n,Avg_variant_local_rate_pct,Verdict,Read_share_pattern
+hla_c_03_04,1273_1711->1291_1711,intron5_retention,23,119,19.327731092436974,1,9,11.11111111111111,9,13.432036076273473,real_variable_splicing_candidate,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_03_03,1273_1711->1291_1711,intron5_retention,11,80,13.75,1,14,7.142857142857143,14,13.845806452258916,real_variable_splicing_candidate,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_03_02,358_796->376_796,intron5_retention,2,27,7.407407407407407,0,2,0.0,2,16.16952326043358,real_variable_splicing_candidate,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_01_02,1272_1710->1290_1710,intron5_retention,4,69,5.797101449275362,0,7,0.0,7,11.198854568884503,real_variable_splicing_candidate,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_02_02,1264_1702->1282_1702,intron5_retention,3,70,4.285714285714286,0,11,0.0,11,10.661191618369283,rare_private_event,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_17_01,1271_1708->1271_1970,exon5_skip,1,36,2.7777777777777777,1,1,100.0,1,28.126078309881596,real_variable_splicing_candidate,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_05_01,1271_1709->1289_1709,intron5_retention,2,116,1.7241379310344827,0,15,0.0,15,12.505313592664177,rare_private_event,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_08_02,1271_1709->1289_1709,intron5_retention,1,61,1.639344262295082,0,7,0.0,7,10.87943500924836,rare_private_event,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_07_01,1273_1712->1291_1712,intron5_retention,2,208,0.9615384615384616,0,22,0.0,22,10.59272340976606,rare_private_event,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_04_01,1039_1477->1057_1477,intron5_retention,1,224,0.44642857142857145,0,25,0.0,25,10.522243713733076,rare_private_event,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"
+hla_c_12_02,1271_1709->1271_1950,exon5_skip,0,45,0.0,1,7,14.285714285714286,7,13.327383608508105,real_variable_splicing_candidate,"annotated junction stays dominant -- novel is a minor, fairly fixed fraction"

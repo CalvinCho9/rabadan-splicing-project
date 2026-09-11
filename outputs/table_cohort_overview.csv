@@ -1,0 +1,3 @@
+Type,N_samples,N_carriers_any_AS_event,Pct_carriers,Median_events_per_sample,Mean_events_per_sample,Max_events_per_sample,N_distinct_AS_patterns
+tumor,935,122,13.04812834224599,0.0,0.18074866310160428,2,4
+normal,106,19,17.92452830188679,0.0,0.25471698113207547,2,2

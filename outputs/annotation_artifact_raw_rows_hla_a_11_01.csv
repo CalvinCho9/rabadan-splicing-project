@@ -1,0 +1,32 @@
+Type,Barcode,Allele,Contig_rd,Annotated_cumsum,Role,Splice_coord,Uniquely_mapping,Local_rate
+tumor,TCGA-A2-A04V,2,hla_a_11_01,5,ANNOTATED (reference),2365_2806,3226,0.762
+tumor,TCGA-A2-A04V,2,hla_a_11_01,5,NOVEL -- flagged event,2383_2806,986,0.233
+tumor,TCGA-A2-A04V,2,hla_a_11_01,5,novel (below threshold),2365_2810,18,0.004
+tumor,TCGA-A2-A04V,2,hla_a_11_01,5,novel (below threshold),2383_2810,6,0.001
+tumor,TCGA-A7-A0D9,1,hla_a_11_01,5,ANNOTATED (reference),2365_2806,803,0.736
+tumor,TCGA-A7-A0D9,1,hla_a_11_01,5,NOVEL -- flagged event,2383_2806,281,0.258
+tumor,TCGA-A7-A0D9,1,hla_a_11_01,5,novel (below threshold),2365_2810,4,0.004
+tumor,TCGA-A7-A0D9,1,hla_a_11_01,5,novel (below threshold),2383_2810,3,0.003
+tumor,TCGA-A7-A13D,1,hla_a_11_01,5,ANNOTATED (reference),2365_2806,76,0.738
+tumor,TCGA-A7-A13D,1,hla_a_11_01,5,NOVEL -- flagged event,2383_2806,27,0.262
+tumor,TCGA-A7-A26I,2,hla_a_11_01,5,ANNOTATED (reference),2365_2806,3094,0.838
+tumor,TCGA-A7-A26I,2,hla_a_11_01,5,NOVEL -- flagged event,2383_2806,590,0.16
+tumor,TCGA-A7-A26I,2,hla_a_11_01,5,novel (below threshold),2365_2810,7,0.002
+tumor,TCGA-A7-A26I,2,hla_a_11_01,5,novel (below threshold),2365_3292,1,0.0
+normal,TCGA-A7-A0CE,2,hla_a_11_01,5,ANNOTATED (reference),2365_2806,3017,0.626
+normal,TCGA-A7-A0CE,2,hla_a_11_01,5,NOVEL -- flagged event,2383_2806,1784,0.37
+normal,TCGA-A7-A0CE,2,hla_a_11_01,5,novel (below threshold),2383_2810,8,0.002
+normal,TCGA-A7-A0CE,2,hla_a_11_01,5,novel (below threshold),2365_2810,5,0.001
+normal,TCGA-A7-A0CE,2,hla_a_11_01,5,novel (below threshold),2383_2699,2,0.0
+normal,TCGA-A7-A0D9,1,hla_a_11_01,5,ANNOTATED (reference),2365_2806,2363,0.709
+normal,TCGA-A7-A0D9,1,hla_a_11_01,5,NOVEL -- flagged event,2383_2806,964,0.289
+normal,TCGA-A7-A0D9,1,hla_a_11_01,5,novel (below threshold),2383_2810,5,0.001
+normal,TCGA-A7-A0D9,1,hla_a_11_01,5,novel (below threshold),2365_2810,2,0.001
+normal,TCGA-BH-A0AY,2,hla_a_11_01,5,ANNOTATED (reference),2365_2806,3370,0.722
+normal,TCGA-BH-A0AY,2,hla_a_11_01,5,NOVEL -- flagged event,2383_2806,1293,0.277
+normal,TCGA-BH-A0AY,2,hla_a_11_01,5,novel (below threshold),2383_2810,5,0.001
+normal,TCGA-BH-A0C0,2,hla_a_11_01,5,ANNOTATED (reference),2365_2806,3236,0.745
+normal,TCGA-BH-A0C0,2,hla_a_11_01,5,NOVEL -- flagged event,2383_2806,1098,0.253
+normal,TCGA-BH-A0C0,2,hla_a_11_01,5,novel (below threshold),2365_2810,5,0.001
+normal,TCGA-BH-A0C0,2,hla_a_11_01,5,novel (below threshold),2383_2810,4,0.001
+normal,TCGA-BH-A0C0,2,hla_a_11_01,5,novel (below threshold),2840_2958,2,0.0
