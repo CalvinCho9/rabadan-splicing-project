@@ -1,0 +1,2 @@
+Gene,Cohort,Contig_rd,AS_pattern,Event_class,Normal_carriers,Tumor_carriers,Tumor_denom,Normal_denom,Tumor_freq,Normal_freq,Total_carriers,Tested,Fisher_p,Odds_ratio,OR_CI_low,OR_CI_high,Tumor_freq_CI_low,Tumor_freq_CI_high,Normal_freq_CI_low,Normal_freq_CI_high,FDR_q
+HLA-A,TCGA-HNSC,hla_a_11_01,2365_2806->2383_2806,intron5_retention,1,1,3,1,0.3333333333333333,1.0,2,False,,,,,6.149194472039621,79.23403991979522,20.654931437723747,100.0,

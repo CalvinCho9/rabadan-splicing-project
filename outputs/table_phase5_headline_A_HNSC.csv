@@ -1,0 +1,3 @@
+Gene,Cohort,Event_class,Tumor_carriers,Tumor_total,Tumor_pct,Tumor_CI_low,Tumor_CI_high,Normal_carriers,Normal_total,Normal_pct,Normal_CI_low,Normal_CI_high,Risk_diff_pct,Risk_diff_CI_low,Risk_diff_CI_high,Odds_ratio,OR_CI_low,OR_CI_high,OR_haldane_corrected,Fisher_p,Direction,Excluded_alleles,Quarantined,Low_N_exploratory
+HLA-A,TCGA-HNSC,exon5_skip,0,52,0.0,0.0,6.879223612386235,0,5,0.0,0.0,43.44824647831748,0.0,0.0,0.0,0.10476190476190476,0.0018861643486996274,5.8187170682708045,True,1.0,no difference,hla_a_11_01,False,True
+HLA-A,TCGA-HNSC,intron5_retention,0,52,0.0,0.0,6.879223612386235,0,5,0.0,0.0,43.44824647831748,0.0,0.0,0.0,0.10476190476190476,0.0018861643486996274,5.8187170682708045,True,1.0,no difference,hla_a_11_01,False,True

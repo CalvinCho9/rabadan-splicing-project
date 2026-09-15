@@ -1,0 +1,9 @@
+Gene,Cohort,Tumor_n,Normal_n,N_events,Excluded_alleles,Quarantined
+HLA-A,TCGA-CHOL,33,8,4,hla_a_11_01,False
+HLA-A,TCGA-HNSC,52,5,3,hla_a_11_01,False
+HLA-B,TCGA-CHOL,33,8,0,,True
+HLA-B,TCGA-HNSC,67,35,0,,True
+HLA-B,TCGA-KIRC,92,37,2,,True
+HLA-C,TCGA-CHOL,33,8,2,,False
+HLA-C,TCGA-HNSC,67,35,4,,False
+HLA-C,TCGA-KIRC,92,37,6,,False

@@ -358,6 +358,97 @@ Committed to git after this phase.
 
 ---
 
+## Phase 5 — pan-cancer NORMAL pool resolved to true cohort of origin
+
+Not overnight/unattended like Phases 1-4 — triggered by Anqi's actual reply
+to the "can we pull more BRCA normals?" question asked at the end of Phase
+4. Two things in her message: (1) 106 BRCA normals is already enough for a
+proportion comparison, no need to pull more; (2) she attached
+`gdc_sample_sheet_normal_with_hla.tsv`, a GDC sample sheet + HLA typing for
+740 normal samples across 24 TCGA projects. Read literally, that file looks
+like it's *about* BRCA (her message was in response to a BRCA-normals
+question) — it isn't, mostly. Checked: it maps `Case ID` -> `Project ID` for
+every normal sample in it, and cross-referencing against the pan-cancer SJ
+files' Barcode column shows every one of the pooled `Cohort=="NORMAL"`
+barcodes (145 in the HLA-A pan file, 318 in HLA-B/C's) resolves to a real
+TCGA project -- 0 unresolved in both cases. That pool is exactly what
+`phase3_pancancer_descriptive.py`'s docstring calls "a separate cross-cohort
+normal-tissue pool ... not per-cancer-type matched normals." Resolving it
+turns that into real matched normals for whichever TCGA project also has
+tumor rows in the same pan file.
+
+Checked which cohorts that actually gives a usable test for (>=3 samples
+both sides after resolving): TCGA-CHOL (33 tumor/8 normal) and TCGA-HNSC
+(52 tumor/5 normal) for the HLA-A pan file; TCGA-CHOL (33/8), TCGA-HNSC
+(67/35), TCGA-KIRC (92/37) for HLA-B/C's (same 7-cohort file, more tumor
+cohorts). Cohorts that DON'T get a new test and why: TCGA-LGG and TCGA-ACC
+have tumor rows but no TCGA project of that name anywhere in the 24-project
+sheet at all (no normal exists to resolve to); TCGA-THCA has 47 resolved
+normals but only 1 tumor sample; TCGA-UCEC has up to 79 tumor samples but
+only 1 resolved normal. Wrote `phase5_pancancer_matched_normal.py` to run
+the exact same headline (Fisher/Wilson/OR) machinery Phase 2 uses for BRCA,
+restricted to each of these cohorts one at a time, gated by the same Phase
+1 quarantine (HLA-B -> `outputs/UNVALIDATED_HLA_B_phase5_*`).
+
+**Near-miss, caught before writing up results:** the first version excluded
+constitutive-artifact alleles by re-deriving the exclusion per cohort, same
+as Phase 2 does for BRCA (`hla_common.top_event_penetrance` +
+`add_verdict`, which won't flag an allele with fewer than 10-20 carriers).
+TCGA-CHOL and TCGA-HNSC only have 2-3 tumor samples carrying A\*11:01 each
+-- nowhere near that bar -- so the re-derivation said "nothing to exclude,"
+and the resulting headline numbers for HLA-A in both cohorts were "enriched
+in tumor." Before writing any of that into `RESULTS_SUMMARY.md`, opened the
+underlying per-pattern detail CSV to see which allele/pattern was actually
+driving each headline number (worth doing as a habit, not just when
+something looks suspicious) and found: 100% of both cohorts' original
+intron5_retention carriers were `hla_a_11_01`'s already-known
+`2365_2806->2383_2806` artifact junction (Finding 3/5), not new biology.
+Fixed by excluding A\*11:01 unconditionally in every cohort (it's already
+established project-wide, not something that should need to clear a
+per-cohort sample-size bar again), keeping the per-cohort re-derivation
+running on top in case a *different* cohort-specific artifact shows up
+(none did). Re-ran; HLA-A's TCGA-HNSC comparison now has zero qualifying
+events on either side, and TCGA-CHOL's intron5_retention count dropped from
+3 to the 1 real (non-artifact) carrier.
+
+Also ran a bonus check in the same script: does HLA-C's own Finding-4
+candidate (`hla_c_03_03`/`hla_c_03_04`, a real, non-artifact
+intron5_retention pattern that in BRCA rested on a single fragile
+normal-side carrier) show up again in the newly-resolvable cohorts? It
+does, in all three (TCGA-CHOL 1/0, TCGA-HNSC 4/0, TCGA-KIRC 3/0
+tumor/normal carriers) -- pooled with BRCA, 42 tumor vs 2 normal across 4
+independent cohorts, directionally consistent every time. Written up
+carefully as "worth a dedicated follow-up," explicitly NOT as a replication
+-- no individual test reaches significance, this wasn't pre-registered, and
+raw-count pooling across cohorts isn't a proper stratified test.
+
+All 16 gene x cohort x event-class headline tests from this phase come back
+null (every OR 95% CI spans 1) -- consistent with, not contradicting, the
+BRCA-only story. Didn't touch `figures_overview.pdf` given an all-null
+result set doesn't earn a 6th panel in an already-tuned 5-panel figure;
+`outputs/fig_phase5_matched_normal.pdf` stands alone instead. Updated
+`RESULTS_SUMMARY.md` (Finding 6, Bottom line), `PRESENTATION_NOTES.md`
+(bullets 11-12, corrected the now-stale "more normals" next-step to reflect
+Anqi's actual answer), and `README_FOR_CLAUDE.md` (data file, script #10,
+key outputs). Moved `gdc_sample_sheet_normal_with_hla.tsv` into `data/`
+(it arrived at the project root) to match the project's existing
+data/root/outputs layout convention.
+
+Also fixed a latent bug surfaced by this phase, not introduced by it:
+`hla_common.top_event_penetrance()` crashed with a `KeyError` on any
+input where zero alleles reach `min_allele_samples` with a qualifying
+event (an empty `rows` list produces a columnless `pd.DataFrame`, and
+`.sort_values()` on that raises rather than returning empty) -- never
+triggered before because Phase 1/2 always call it on the full 935+106 BRCA
+cohort, where this never happens, but several of Phase 5's small
+single-cohort slices (as few as 33+8 samples) hit it immediately. Fixed by
+returning an empty, correctly-columned frame in that case; Phase 1/2's
+BRCA-scale behavior is unaffected (never exercises that branch).
+
+Committed to git after this phase.
+
+---
+
 ## TOP THINGS TO REVIEW
 
 Ranked most-likely-to-be-wrong first. (A shorter, gene-organized version of
@@ -424,3 +515,20 @@ this same list is also in `outputs/FINAL_REVIEW.md`.)
    flagging because a less careful read of just the summary count ("3
    combinations flagged") could be misread as 3 separate findings if
    someone skims only the number.
+8. **Phase 5's HLA-C bonus finding (bullet 12/Finding 6) pools raw carrier
+   counts across 4 cohorts (42 tumor vs 2 normal) without a proper
+   stratified test (e.g. Cochran-Mantel-Haenszel).** Deliberately presented
+   as descriptive corroboration, not a pooled significance claim — same
+   restraint Finding 5 used for A\*11:01's cross-cohort recurrence — but
+   worth a second look before anyone is tempted to compute a naive pooled
+   Fisher test on those numbers and call it significant; the four cohorts
+   have different allele frequencies and ascertainment, so a naive pool
+   would overstate confidence.
+9. **The exclusion-derivation near-miss documented in Phase 5 above** (the
+   per-cohort constitutive-artifact re-check missing A\*11:01 in small
+   cohorts) is a structural gap in `hla_common.top_event_penetrance`'s
+   design, not just a one-off Phase 5 bug: any *future* script that calls
+   it on a small single-cohort slice without also applying the
+   project-wide known-artifact list will make the same mistake. Worth a
+   comment or guard in `hla_common.py` itself if this pattern gets reused
+   again, rather than re-deriving the fix ad hoc each time.

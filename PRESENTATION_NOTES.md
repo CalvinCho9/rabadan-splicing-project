@@ -106,14 +106,54 @@ say anything, still under review" — see `outputs/FINAL_REVIEW.md` /
     `outputs/UNVALIDATED_HLA_B_*` for what exists, but don't present it as
     a result."
 
+11. **Anqi's fix for "we need more normals" wasn't more normals — it was
+    knowing where the ones we have come from.** She confirmed 106 BRCA
+    normals is already enough for a proportion comparison, and sent
+    `gdc_sample_sheet_normal_with_hla.tsv` (740 normal samples, 24 TCGA
+    projects) specifically so the pan-cancer files' pooled `NORMAL` samples
+    could be traced back to their real cancer type. Every one resolves
+    (145/145 for HLA-A, 318/318 for HLA-B/C) — turning three more cohorts
+    (TCGA-CHOL, TCGA-HNSC, and for HLA-C also TCGA-KIRC) into genuine
+    matched tumor-vs-normal tests, the same statistics as the BRCA headline
+    test. *Caveat:* all 16 tests come back null (every OR CI spans 1) —
+    this is a methods win (a real question answered: no, we don't need more
+    raw BRCA normals) more than a new biological result.
+
+12. **HLA-C's one real candidate allele (not A\*11:01's artifact) shows the
+    same tumor-only pattern in every cohort tested so far.** The
+    `hla_c_03_03`/`hla_c_03_04` intron5_retention junction from bullet 8's
+    candidate, which rested on a single BRCA normal-side carrier, recurs in
+    TCGA-CHOL, TCGA-HNSC, and TCGA-KIRC — 42 tumor carriers vs 2 normal
+    carriers pooled across all 4 cohorts, never seen in 80 non-BRCA normal
+    samples carrying either allele. *Caveat:* directionally consistent
+    ≠ significant — every individual cohort test still has p>0.5, this
+    wasn't a pre-registered comparison, and pooling raw counts across
+    cohorts isn't a proper stratified test. Presented as "worth a dedicated
+    follow-up," not as confirmed variable splicing. **Also worth
+    mentioning if asked:** a first pass at this analysis almost let
+    A\*11:01's already-known artifact back in as a fake "cohort-specific"
+    HLA-A finding in TCGA-CHOL/TCGA-HNSC — the per-cohort re-derivation
+    used elsewhere in this project requires more carriers than those small
+    cohorts have. Caught before presenting anything, fixed by excluding
+    A\*11:01 unconditionally everywhere, same as BRCA.
+
 ---
 
 ## Next steps / what would strengthen this
 
-- **More normals.** 106 is the binding constraint on every CI and power
-  number above — even a doubling would meaningfully tighten the
-  intron5_retention estimate and raise achieved power well past the current
-  ~30%, for both A and C.
+- ~~More normals.~~ **Answered by Anqi directly: no.** 106 is enough for
+  the proportion comparison this analysis is built around; what actually
+  moved things forward was resolving pan-cancer normal samples to their
+  true cancer type (bullets 11-12), not adding raw BRCA count. The CI/power
+  numbers above are still wide, and a larger BRCA cohort would still
+  tighten them — but that's a "would be nice," not the blocking gap it was
+  framed as before this conversation.
+- **More normals specifically carrying `hla_c_03_03`/`hla_c_03_04`.**
+  Unlike the point above, this one's still open: bullet 12's cross-cohort
+  candidate has only 2 normal-side carriers total across 4 cohorts (all in
+  BRCA) — a targeted pull of more normals known to carry either allele
+  (typeable in advance from a sheet like `gdc_sample_sheet_normal_with_hla.tsv`)
+  would directly test whether the tumor-only pattern holds up.
 - **Confirm the A\*11:01 isoform against the actual reference transcript**
   (not just inferred from read-share) — worth a manual look at that allele's
   GTF/contig to settle whether it's a known, characterized minor isoform;

@@ -150,6 +150,17 @@ def top_event_penetrance(df, events, min_allele_samples=MIN_ALLELE_SAMPLES):
             "Min_group_n": min(nt, nn),
             "Avg_variant_local_rate_pct": 100 * top_sub["Local_rate"].mean(),
         })
+    if not rows:
+        # No allele reaches min_allele_samples with any qualifying event --
+        # happens on small single-cohort slices (added for Phase 5's
+        # per-cohort pan-cancer pass; never triggered on the full BRCA
+        # cohort Phase 1/2 use this for). Return an empty-but-typed frame
+        # so callers can check .empty rather than hit a KeyError from
+        # sort_values() on a columnless DataFrame.
+        return pd.DataFrame(columns=["Contig_rd", "Top_AS_pattern", "Top_event_class",
+                                      "Tumor_carriers", "Tumor_n", "Tumor_pct",
+                                      "Normal_carriers", "Normal_n", "Normal_pct",
+                                      "Min_group_n", "Avg_variant_local_rate_pct"])
     result = pd.DataFrame(rows).sort_values(["Tumor_pct", "Normal_pct"], ascending=False).reset_index(drop=True)
     return result
 

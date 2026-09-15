@@ -138,3 +138,29 @@ important first:
    sample to flip this point estimate's direction entirely — presented
    with that caveat, but it's the kind of number that's tempting to
    overstate live because it "agrees with the paper."
+
+---
+
+## Phase 5 addendum
+
+Added after this file was written, using `gdc_sample_sheet_normal_with_hla.tsv`
+to resolve the pan-cancer files' pooled `NORMAL` samples to their true TCGA
+project of origin and run a real matched tumor-vs-normal test in
+TCGA-CHOL/TCGA-HNSC (HLA-A) and TCGA-CHOL/TCGA-HNSC/TCGA-KIRC (HLA-B/C).
+**No per-gene verdict above changes** — all 16 new tests are null (every OR
+CI spans 1), consistent with, not contradicting, the BRCA-only picture.
+Two things worth folding into how each gene's status is described:
+- **HLA-A:** the *unconditional* A\*11:01 exclusion turned out to matter
+  more than expected — a per-cohort re-derivation of the exclusion (as used
+  elsewhere) missed it in these smaller cohorts and would have produced a
+  false "cohort-specific enrichment" if not caught before presenting. See
+  `OVERNIGHT_LOG.md` Phase 5 for the near-miss.
+- **HLA-C:** the `hla_c_03_04`-family candidate (item 6 above, previously
+  resting on n=1) now has 3 more independent cohorts pointing the same
+  direction (42 tumor vs 2 normal pooled across 4 cohorts) — still not
+  significant anywhere individually, so this stays **real_variable_
+  splicing_candidate, corroborated but unconfirmed**, not upgraded to
+  "real."
+
+Full detail: `outputs/PHASE5_pancancer_matched_normal.md`,
+`RESULTS_SUMMARY.md` Finding 6.

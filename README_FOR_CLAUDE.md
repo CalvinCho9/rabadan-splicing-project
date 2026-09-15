@@ -27,6 +27,16 @@ Motif, Annotated, Uniquely_mapping, Multimapping, Overhang`
 - `data/pancancer_status.txt` — per-cohort sample-count reference table,
   not machine-parsed by any script here.
 - `data/deprecated/brca_HLA-A_SJ_combined.tsv` — IGNORE, no Type column, all-tumor
+- `data/gdc_sample_sheet_normal_with_hla.tsv` — GDC sample sheet (17 cols,
+  WITH header) for 740 normal samples across 24 TCGA projects, with
+  HLA-A/B/C typing per sample. Sent by Anqi in response to "can we get more
+  BRCA normals" — her actual point was that 106 is enough for a proportion
+  comparison, and what this file is really for is resolving the pan-cancer
+  files' pooled `Cohort=="NORMAL"` samples (see above) back to their true
+  TCGA project of origin via `Case ID` -> `Project ID` (145/145 barcodes
+  resolved for the HLA-A pan file, 318/318 for HLA-B/C). Used by
+  `phase5_pancancer_matched_normal.py` — see that script's docstring and
+  `outputs/PHASE5_pancancer_matched_normal.md`.
 
 ## Scripts (run in this order to reproduce everything)
 1. `analyze_brca.py` — main analysis: cohort overview, headline tumor-vs-normal
@@ -77,32 +87,49 @@ Motif, Annotated, Uniquely_mapping, Multimapping, Overhang`
    claims). Includes the A\*11:01 cross-cohort recurrence check. Excludes
    the mislabeled `BRCA_NORMAL` block from the B/C pan files. Same
    gene-level quarantine as Phase 2.
+10. `phase5_pancancer_matched_normal.py` — uses
+    `data/gdc_sample_sheet_normal_with_hla.tsv` to resolve Phase 3's pooled
+    `NORMAL` cohort to each sample's true TCGA project of origin, turning
+    the pan-cancer pass from purely descriptive into a real matched-cohort
+    tumor-vs-normal test (same Fisher/Wilson/OR machinery as Phase 2) for
+    every cohort with 3+ samples on both sides after resolution: TCGA-CHOL
+    and TCGA-HNSC for HLA-A, plus TCGA-KIRC for HLA-B/C. Re-applies the
+    A\*11:01 exclusion unconditionally (catches it even in cohorts too
+    small for the per-cohort re-derivation to flag it on its own — see the
+    script's docstring for a near-miss this caught) and re-runs the
+    per-cohort constitutive check on top for any new artifact. Same
+    gene-level quarantine as Phase 2/3.
 
 Running order for a from-scratch reproduction of everything:
 `analyze_brca.py` → `diagnostic_annotation_check.py` →
 `additional_analyses.py` → `phase1_bc_strand_check.py` →
 `phase2_bc_headline.py` → `phase3_pancancer_descriptive.py` →
+`phase5_pancancer_matched_normal.py` →
 `make_figures_overview.py` → `make_background_figures.py`.
 
 ## Write-up (project root)
 - `RESULTS_SUMMARY.md` — the full narrative: cohort → pipeline generalization
   → headline test (with power analysis + threshold sensitivity) → HLA-A\*11:01
   diagnosis → HLA-C headline test → A\*11:01 pan-cancer generalization →
-  bottom line. HLA-B is deliberately absent (quarantined).
-- `PRESENTATION_NOTES.md` — 10 claim/stat/caveat bullets + a next-steps
+  matched-normal pan-cancer extension (Finding 6) → bottom line. HLA-B is
+  deliberately absent (quarantined).
+- `PRESENTATION_NOTES.md` — 12 claim/stat/caveat bullets + a next-steps
   slide, framed against the MHC Hammer paper (bullets 1-7 original HLA-A,
-  8-10 the B/C extension).
+  8-10 the B/C extension, 11-12 the Phase 5 matched-normal extension).
 - `ANNOTATION_ARTIFACT_NOTE.md` — the HLA-A\*11:01 writeup on its own
   (BRCA-only; see `outputs/PHASE3_pancancer_descriptive.md` for the
   pan-cancer follow-up).
-- `OVERNIGHT_LOG.md` — chronological run log for the B/C extension: every
-  assumption, judgment call, and thing to double-check, plus a "top things
-  to review" list.
+- `OVERNIGHT_LOG.md` — chronological run log for the B/C extension +
+  Phase 5: every assumption, judgment call, and thing to double-check, plus
+  a "top things to review" list.
 - `outputs/FINAL_REVIEW.md` — one paragraph per gene: what's real / null /
   artifact / underpowered / quarantined.
-- `figures_overview.pdf` — results slide panel, now HLA-A + HLA-C (A1/A2:
+- `figures_overview.pdf` — results slide panel, HLA-A + HLA-C (A1/A2:
   headline classes per gene, B: HLA-A per-allele contrast, C: combined
   volcano, D: A\*11:01 pan-cancer recurrence). HLA-B intentionally excluded.
+  **Not updated for Phase 5** (all-null results there don't earn a 6th panel
+  in an already-tuned figure) — see `outputs/fig_phase5_matched_normal.pdf`
+  and `outputs/PHASE5_pancancer_matched_normal.md` instead.
 - `background_method.pdf` — background/method schematic (pipeline flowchart
   + splicing-geometry cartoon).
 
@@ -118,6 +145,10 @@ Running order for a from-scratch reproduction of everything:
 - `annotation_artifact_check.csv` + `annotation_artifact_raw_rows_hla_a_11_01.csv`
 - `fig_cohort_overview.pdf`, `fig_event_burden.pdf`, `fig_heatmap_tumor.pdf`,
   `fig_heatmap_normal.pdf`
+- `table_phase5_summary.csv` (every Phase 5 gene x cohort x class headline
+  test), `table_phase5_cohort_meta.csv` (N + excluded alleles per pair),
+  `table_phase5_hla_c_candidate_cross_cohort.csv` (Finding-4 candidate
+  pooled across BRCA/CHOL/HNSC/KIRC) + `fig_phase5_matched_normal.pdf`
 
 Always write new generated files into `outputs/` (or the project root for
 slide-ready composites, matching the pattern above) — never into `data/`.

@@ -1,0 +1,1 @@
+Gene,Cohort,Contig_rd,AS_pattern,Event_class,Tumor_carriers,Normal_carriers,Tumor_denom,Normal_denom,Tumor_freq,Normal_freq,Total_carriers,Tested,Fisher_p,Odds_ratio,OR_CI_low,OR_CI_high,Tumor_freq_CI_low,Tumor_freq_CI_high,Normal_freq_CI_low,Normal_freq_CI_high,FDR_q

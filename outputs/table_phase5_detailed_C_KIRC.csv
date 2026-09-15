@@ -1,0 +1,4 @@
+Gene,Cohort,Contig_rd,AS_pattern,Event_class,Tumor_carriers,Normal_carriers,Tumor_denom,Normal_denom,Tumor_freq,Normal_freq,Total_carriers,Tested,Fisher_p,Odds_ratio,OR_CI_low,OR_CI_high,Tumor_freq_CI_low,Tumor_freq_CI_high,Normal_freq_CI_low,Normal_freq_CI_high,FDR_q
+HLA-C,TCGA-KIRC,hla_c_03_04,1273_1711->1291_1711,intron5_retention,3,0,14,4,0.21428571428571427,0.0,3,True,1.0,2.739130434782609,0.1165306301595188,64.38509367435609,7.571386712693185,47.589230586600294,0.0,48.98908364545973,1.0
+HLA-C,TCGA-KIRC,hla_c_07_01,1273_1712->1291_1712,intron5_retention,1,0,32,11,0.03125,0.0,1,False,,,,,0.5537860164003122,15.744263820012558,0.0,25.88329669680317,
+HLA-C,TCGA-KIRC,hla_c_17_01,1271_1708->1289_1708,intron5_retention,1,0,2,1,0.5,0.0,1,False,,,,,9.453120573423075,90.54687942657694,0.0,79.34506856227625,
