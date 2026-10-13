@@ -1,8 +1,8 @@
 # Figure audit — HLA splicing talk
 
-Audit performed by reading the plotting code in `analyze_brca.py`,
-`additional_analyses.py`, `phase2_bc_headline.py`,
-`phase5_pancancer_matched_normal.py`, `make_figures_overview.py`, and by
+Audit performed by reading the plotting code in `scripts/analyze_brca.py`,
+`scripts/additional_analyses.py`, `scripts/phase2_bc_headline.py`,
+`scripts/phase5_pancancer_matched_normal.py`, `scripts/make_figures_overview.py`, and by
 rendering page 1 of every candidate figure to PNG and reading the title text
 directly (not just tracing code).
 
@@ -22,7 +22,7 @@ fill or drop.
 | fig_heatmap_normal | HLA-A | samples × alleles, normal, colored by AS_pattern | Title correct, legible (19 normal samples). Renders fine. | none | no fix needed | — |
 | fig_threshold_sensitivity | HLA-A | intron5_retention OR vs 3 swept thresholds | Renders correctly, conclusion visibly stable (all CIs cross OR=1, direction consistent) — this is itself an honest, informative null/stability result, not a bug. | none | no fix needed | — |
 | fig_allele_frequency_spectrum | HLA-A | top-20 allele carrier counts, tumor vs normal | Renders correctly, legible. | none | no fix needed | — |
-| fig_classes_HLA-C | HLA-C | headline classes, HLA-C data | **Title says "HLA-A alternative splicing: tumor vs normal"** while plotting HLA-C's headline table. Cause: `analyze_brca.plot_classes()` hardcodes the string `"HLA-A"` in `ax.set_title(...)`; `phase2_bc_headline.py` calls `ab.plot_classes(headline, fname(...))` without any gene parameter. | A (mislabel) | Parameterize `gene_label` in `plot_classes()`; pass `"HLA-C"` from `phase2_bc_headline.py`. | — |
+| fig_classes_HLA-C | HLA-C | headline classes, HLA-C data | **Title says "HLA-A alternative splicing: tumor vs normal"** while plotting HLA-C's headline table. Cause: `analyze_brca.plot_classes()` hardcodes the string `"HLA-A"` in `ax.set_title(...)`; `scripts/phase2_bc_headline.py` calls `ab.plot_classes(headline, fname(...))` without any gene parameter. | A (mislabel) | Parameterize `gene_label` in `plot_classes()`; pass `"HLA-C"` from `scripts/phase2_bc_headline.py`. | — |
 | fig_per_allele_HLA-C | HLA-C | 19-panel grid, per-allele HLA-C | **Title says "HLA-A exon5_skip / intron5_retention by allele"** over HLA-C panels (verified: allele labels are `hla_c_*`). Same hardcoded-string cause in `plot_per_allele()`'s `fig.suptitle(...)`. Also 19 panels, unreadable on a slide (same readability issue as the HLA-A grid). | A (mislabel + readability) | Parameterize `gene_label`; pass `"HLA-C"`. Add `fig_per_allele_HLA-C_talk.pdf` restricted to `hla_c_03_03`, `hla_c_03_04` (the Finding-4 real-variable-splicing candidate — the only story-carrying HLA-C panels; everything else is a 0-carrier null, per `table_per_allele_HLA-C.csv`). | — |
 | fig_volcano_HLA-C | HLA-C | volcano, HLA-C patterns ≥3 carriers | **Title says "HLA-A AS_pattern recurrence, tumor vs normal"** over HLA-C's 4 tested patterns. Same hardcoded string in `plot_volcano()`. Additionally: 4 patterns tested, **0 pass BH-FDR q<0.05** (`table_volcano_HLA-C.csv`) — genuinely null at the corrected level, same as HLA-A's volcano. | A (mislabel) + B (genuinely null after correction) | Parameterize `gene_label` → `"HLA-C"`. Same nominal-vs-FDR line label + tested/significant count annotation as fig_volcano. | — |
 | fig_phase5_matched_normal | pan-cancer, HLA-A + HLA-C (HLA-B computed but excluded from the plot) | grouped bars, % samples carrying event, per gene×cohort×class, matched tumor-vs-normal | Not mislabeled (built from per-gene/per-cohort labels, no hardcoded gene string) and not sparse in the sense of missing data — but **0 of the 10 presented (gene, cohort, class) tests have an OR 95% CI excluding 1** (`table_phase5_summary.csv`, presented rows only: HLA-A×{CHOL,HNSC}×2 classes + HLA-C×{CHOL,HNSC,KIRC}×2 classes = 4+6=10; HLA-B's 6 rows are quarantined out), i.e. it is a genuinely null pan-cancer result, and the figure gave no explicit tested/significant count to tell a viewer that at a glance. | B (genuinely null) | Keep the figure exactly as computed. Add a summary annotation ("10 gene×cohort×class tests shown, 0 with OR 95% CI excluding 1 (nominal, not FDR-corrected)") pulled from the already-computed `Quarantined`/`OR_CI_low`/`OR_CI_high` columns of the `summary` dataframe already in memory in `plot_summary()` — identical arithmetic to what `write_report()` already does elsewhere in the same script, not a new computation. | — |
@@ -59,8 +59,8 @@ fill or drop.
 All fixes were presentation-only: title text, chart type, legend placement,
 figure width, and added annotations pulled from already-computed columns.
 **No threshold, parameter, statistic, or plotted value was changed.** Every
-pipeline (`analyze_brca.py`, `phase2_bc_headline.py`,
-`phase5_pancancer_matched_normal.py`, `make_figures_overview.py`) was
+pipeline (`scripts/analyze_brca.py`, `scripts/phase2_bc_headline.py`,
+`scripts/phase5_pancancer_matched_normal.py`, `scripts/make_figures_overview.py`) was
 re-run end to end after the edits; all regenerated cleanly with the same
 printed numbers as before (verified by diffing console `Fisher p` / `OR` /
 carrier-count lines against the pre-fix run logs). Every corrected PDF's
@@ -68,8 +68,8 @@ page 1 was then rasterized (QuickLook `qlmanage -t`, not code tracing) and
 the title text read directly off the image.
 
 ### Title fixes (`gene_label` parameterized in `analyze_brca.plot_classes()` /
-`plot_per_allele()` / `plot_volcano()`; every caller in `analyze_brca.py`'s
-`main()` and `phase2_bc_headline.py`'s `run_gene()` now passes its own gene)
+`plot_per_allele()` / `plot_volcano()`; every caller in `scripts/analyze_brca.py`'s
+`main()` and `scripts/phase2_bc_headline.py`'s `run_gene()` now passes its own gene)
 
 | figure | before | after |
 |---|---|---|
@@ -134,8 +134,8 @@ full grids keep the original figure-level legend placement unchanged.
   replacements.
 - HLA-B remains fully quarantined: not un-quarantined, no
   `UNVALIDATED_HLA_B_*` file was moved, renamed out of the `UNVALIDATED_`
-  prefix, or referenced from `figures_overview.pdf` / `RESULTS_SUMMARY.md` /
-  `PRESENTATION_NOTES.md`. `UNVALIDATED_HLA_B_README.md`'s quarantine
+  prefix, or referenced from `presentation/figures_overview.pdf` / `docs/RESULTS_SUMMARY.md` /
+  `presentation/PRESENTATION_NOTES.md`. `UNVALIDATED_HLA_B_README.md`'s quarantine
   language is untouched.
 - No p-value, odds ratio, confidence interval, carrier count, threshold
   (`local_rate_threshold`, `exon_skip_min_jump`,

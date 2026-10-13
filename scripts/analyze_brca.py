@@ -4,7 +4,7 @@ analyze_brca.py
 ================================================================================
 Alternative-splicing comparison, tumor vs normal, for HLA-A (TCGA-BRCA).
 
-See README_FOR_CLAUDE.md for the canonical folder layout:
+See docs/ANALYSIS_GUIDE.md for the canonical folder layout:
     data/       input TSVs (do not edit)
     outputs/    everything this script generates
     analyze_brca.py   this file

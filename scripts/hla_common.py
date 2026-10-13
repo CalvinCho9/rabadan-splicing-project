@@ -3,8 +3,8 @@
 hla_common.py
 ================================================================================
 Shared helpers for extending the HLA-A pipeline (analyze_brca.py) to HLA-B/C
-and to the pan-cancer files, added for the overnight B/C run (see
-OVERNIGHT_LOG.md, outputs/PHASE1_BC_strand_check.md).
+and to the pan-cancer files, added for the HLA-B/C analysis (see
+docs/ANALYSIS_LOG.md, outputs/PHASE1_BC_strand_check.md).
 
 Does NOT modify analyze_brca.py -- imports it as a library (`import
 analyze_brca as ab`) and reuses its loading / bucketing / stats functions

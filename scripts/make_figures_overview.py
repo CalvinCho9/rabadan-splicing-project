@@ -2,10 +2,10 @@
 """
 make_figures_overview.py
 ================================================================================
-Composites results into a single multi-panel page (figures_overview.pdf,
+Composites results into a single multi-panel page (presentation/figures_overview.pdf,
 project root) for dropping straight into slides.
 
-UPDATED (Phase 4, overnight B/C run): now a two-gene overview -- HLA-A (the
+UPDATED (Phase 4, HLA-B/C analysis): now a two-gene overview -- HLA-A (the
 original, fully-worked analysis) plus HLA-C, the only other gene Phase 1
 (outputs/PHASE1_BC_strand_check.md) validated the exon5_skip/intron5_retention
 classifier for. HLA-B is NOT included anywhere in this figure -- its
@@ -14,7 +14,7 @@ AS events total), and per the project's quarantine rule, unvalidated B/C
 results never enter this figure. This is "the validated three-gene
 framework, currently showing the two genes that passed validation" rather
 than a true three-gene panel -- see outputs/FINAL_REVIEW.md for the
-per-gene status and OVERNIGHT_LOG.md for why.
+per-gene status and docs/ANALYSIS_LOG.md for why.
 
 Five panels:
     A1. HLA-A headline classes (tumor vs normal, A*11:01 excluded) --
@@ -204,7 +204,7 @@ def main():
     fig.suptitle("HLA-A / HLA-C alternative splicing, TCGA-BRCA + pan-cancer\n"
                  "(HLA-B not shown: classifier unvalidated, quarantined — see outputs/FINAL_REVIEW.md)",
                  fontsize=14, y=0.995)
-    outpath = Path("figures_overview.pdf")
+    outpath = Path("presentation/figures_overview.pdf")
     fig.savefig(outpath, bbox_inches="tight")
     plt.close(fig)
     print(f"wrote {outpath}")

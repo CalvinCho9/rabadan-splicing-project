@@ -106,7 +106,7 @@ HLA_TYPING_COLS = {
     "HLA-C": ("HLA-C1", "HLA-C2"),
 }
 # Established project-wide (Finding 3: diagnostic_annotation_check.py /
-# ANNOTATION_ARTIFACT_NOTE.md; Finding 5: phase3_pancancer_descriptive.py) --
+# docs/ANNOTATION_ARTIFACT_NOTE.md; Finding 5: phase3_pancancer_descriptive.py) --
 # excluded unconditionally here, not re-derived per cohort (see module
 # docstring for why the per-cohort re-derivation alone isn't enough).
 KNOWN_ARTIFACT_ALLELES = {"HLA-A": ["hla_a_11_01"], "HLA-B": [], "HLA-C": []}
@@ -492,7 +492,7 @@ def write_report(summary, meta, candidate_cross_cohort):
         f"**Multiple testing:** {n_total} (gene, cohort, event class) headline tests run this phase; "
         f"{n_sig} have an OR 95% CI excluding 1 at the nominal (uncorrected) level. None of these were "
         f"planned as a single pre-registered comparison — treat any nominal hit here the same way "
-        f"`RESULTS_SUMMARY.md` treats the BRCA headline numbers: as one candidate among several tests, "
+        f"`docs/RESULTS_SUMMARY.md` treats the BRCA headline numbers: as one candidate among several tests, "
         f"not FDR-corrected across cohorts, worth a closer look but not a standalone claim.\n"
     )
     lines.append(

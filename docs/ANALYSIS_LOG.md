@@ -1,12 +1,12 @@
-# Overnight run log — HLA-B/C extension + pan-cancer descriptive pass
+# Analysis log — HLA-B/C extension + pan-cancer descriptive pass
 
-Run started 2026-09-11, unattended, per instructions: run Phases 1-4 start to
-finish, document everything, don't stop to ask. This file is written
-chronologically as each phase runs; the **TOP THINGS TO REVIEW** section at
-the bottom is the fastest way to catch anything that might be wrong.
+Analysis started 2026-09-11. This record covers Phases 1–4 and the later
+matched-cohort extension, including data checks, assumptions, and decisions.
+Entries follow analysis order; the **TOP THINGS TO REVIEW** section lists
+unresolved questions and follow-up checks.
 
 Context carried in from the existing HLA-A work (not redone, see
-`RESULTS_SUMMARY.md` / `PRESENTATION_NOTES.md` / `ANNOTATION_ARTIFACT_NOTE.md`):
+`docs/RESULTS_SUMMARY.md` / `presentation/PRESENTATION_NOTES.md` / `docs/ANNOTATION_ARTIFACT_NOTE.md`):
 pipeline generalizes; BRCA HLA-A tumor-vs-normal is a null, underpowered
 result; HLA-A\*11:01's recurrent event is a constitutive artifact, excluded
 from headline numbers.
@@ -67,8 +67,8 @@ does not affect Phase 2 (which uses the clean, correctly-labeled
 
 ## Phase 1 — HLA-B/C strand validation
 
-Script: `phase1_bc_strand_check.py` (new). Shared helpers factored into
-`hla_common.py` (new) — imports `analyze_brca` as a library, does not modify
+Script: `scripts/phase1_bc_strand_check.py` (new). Shared helpers factored into
+`scripts/hla_common.py` (new) — imports `analyze_brca` as a library, does not modify
 it, so all existing HLA-A outputs/behavior are untouched.
 
 **What was tested.** The task brief's working hypothesis was that HLA-B/C
@@ -154,14 +154,14 @@ table), `outputs/table_phase1_top_patterns_HLA_{B,C}.csv`,
 **Quarantine rule applied from here on:**
 - **HLA-C**: verdict `valid_as_is` → Phase 2 proceeds normally with the
   standard (unflipped) classifier, results go into the presented outputs
-  (`RESULTS_SUMMARY.md`, `PRESENTATION_NOTES.md`, `figures_overview.pdf`)
+  (`docs/RESULTS_SUMMARY.md`, `presentation/PRESENTATION_NOTES.md`, `presentation/figures_overview.pdf`)
   once Phase 4 folds them in.
 - **HLA-B**: verdict `untrustworthy` (insufficient data to validate either
   scheme) → per the non-negotiable quarantine rule, Phase 2's HLA-B
   tumor-vs-normal output goes to `outputs/UNVALIDATED_HLA_B_*` only, marked
   **NOT FOR PRESENTATION — pending manual strand review**, and is excluded
-  from `RESULTS_SUMMARY.md`, `PRESENTATION_NOTES.md`, and
-  `figures_overview.pdf`.
+  from `docs/RESULTS_SUMMARY.md`, `presentation/PRESENTATION_NOTES.md`, and
+  `presentation/figures_overview.pdf`.
 
 Committed to git after this phase.
 
@@ -169,17 +169,17 @@ Committed to git after this phase.
 
 ## Phase 2 — HLA-B/C tumor-vs-normal
 
-Script: `phase2_bc_headline.py` (new). Runs the exact same headline
+Script: `scripts/phase2_bc_headline.py` (new). Runs the exact same headline
 (Fisher + Wilson CI + OR + Haldane-Anscombe correction), per-allele
 (min_allele_samples=20), and detailed/volcano (min_carriers=3, BH-FDR)
-comparisons `analyze_brca.py` runs for A, pointed at HLA-B/C, with the
+comparisons `scripts/analyze_brca.py` runs for A, pointed at HLA-B/C, with the
 standard (unflipped) classifier for both genes per Phase 1's finding. Also
 re-ran the constitutive-artifact (A\*11:01-style) check independently within
 this script (not just trusting Phase 1's numbers) as the `--exclude-alleles`
 equivalent — **0 alleles flagged for either gene**, so no allele exclusions
 were applied to either gene's headline/per-allele comparison.
 
-**Bug caught and fixed before results were trusted:** `analyze_brca.py`'s
+**Bug caught and fixed before results were trusted:** `scripts/analyze_brca.py`'s
 `plot_per_allele()`/`plot_volcano()` always write to the fixed filenames
 `<outdir>/fig_per_allele.pdf` / `<outdir>/fig_volcano.pdf`. First draft of
 this script called them with `OUTDIR` directly (outputs/) and renamed
@@ -195,7 +195,7 @@ result into the gene-tagged filename, then verified byte-for-byte
 (`md5`) that `outputs/fig_per_allele.pdf` / `outputs/fig_volcano.pdf` match
 the Phase 1 commit exactly after the fix. **Flagging this prominently below
 in TOP THINGS TO REVIEW** since it's exactly the kind of silent-clobber bug
-that's easy to miss in an unattended run — worth a spot-check that HLA-A's
+that warrants a follow-up check — worth a spot-check that HLA-A's
 figures still look right.
 
 ### HLA-C (presented)
@@ -244,7 +244,7 @@ Committed to git after this phase.
 
 ## Phase 3 — pan-cancer descriptive pass
 
-Script: `phase3_pancancer_descriptive.py` (new). Descriptive only, as
+Script: `scripts/phase3_pancancer_descriptive.py` (new). Descriptive only, as
 instructed — no tumor-vs-normal test anywhere in this phase. The `NORMAL`
 cohort in these files is a separate cross-cohort normal-tissue pool, not
 matched normals per cancer type, so even cohorts with both `tumor` and
@@ -268,7 +268,7 @@ no real signal), so there's nothing being lost by quarantining it wholesale.
 
 **Headline finding — A\*11:01's constitutive isoform generalizes beyond
 BRCA.** Tested whether the specific junction established as constitutive in
-BRCA (`2365_2806->2383_2806`, `ANNOTATION_ARTIFACT_NOTE.md`) recurs in other
+BRCA (`2365_2806->2383_2806`, `docs/ANNOTATION_ARTIFACT_NOTE.md`) recurs in other
 cohorts. It does, strongly: **NORMAL pool 20/20 (100%), TCGA-CHOL 3/3
 (100%), TCGA-LGG 6/7 (85.7%)** — only TCGA-HNSC is an outlier (1/3, but n=3
 is too small to weigh against the other three). Pooled: 30/33 (91%) of
@@ -315,34 +315,34 @@ Committed to git after this phase.
 
 ## Phase 4 — consolidation
 
-Updated `RESULTS_SUMMARY.md` (added Finding 4: HLA-C headline test, same
+Updated `docs/RESULTS_SUMMARY.md` (added Finding 4: HLA-C headline test, same
 honest-null treatment as HLA-A; Finding 5: A\*11:01 pan-cancer
 generalization; updated Bottom line; added a gene-coverage note up top
 making the HLA-B quarantine explicit before anyone reads further) and
-`PRESENTATION_NOTES.md` (added bullets 8-10 for HLA-C's headline result,
+`presentation/PRESENTATION_NOTES.md` (added bullets 8-10 for HLA-C's headline result,
 the A\*11:01 pan-cancer finding, and an explicit "HLA-B: validation
 attempted, inconclusive" bullet so it's addressed proactively rather than
 left as a gap if asked live; updated Next Steps). Only HLA-C and the
 pan-cancer A\*11:01/HLA-C descriptive results were folded in, per the
 quarantine rule — no HLA-B number appears anywhere in either file.
 
-Rewrote `make_figures_overview.py` to a two-gene, five-panel layout (A1/A2:
+Rewrote `scripts/make_figures_overview.py` to a two-gene, five-panel layout (A1/A2:
 HLA-A and HLA-C headline classes; B: HLA-A per-allele constitutive-artifact
 contrast, unchanged; C: combined HLA-A+HLA-C volcano; D: new panel, the
 A*11:01 pan-cancer recurrence bar chart) and regenerated
-`figures_overview.pdf`. Titled explicitly as an HLA-A/HLA-C figure with
+`presentation/figures_overview.pdf`. Titled explicitly as an HLA-A/HLA-C figure with
 HLA-B's absence called out in the suptitle and panel C's caption, rather
 than silently omitting it. Rendered a PNG preview before finalizing to
 visually confirm the layout wasn't broken (all 4 subplot groups legible,
 labels not overlapping) — see the preview check before the final
-`figures_overview.pdf` write in this session's tool history.
+`presentation/figures_overview.pdf` write in this session's tool history.
 
 Wrote `outputs/FINAL_REVIEW.md`: one paragraph per gene, each claim tagged
 real/null/artifact/underpowered/quarantined, plus its own "TOP THINGS TO
 REVIEW" list (6 items, focused on what a reader of that specific file needs
 to double-check).
 
-Lightly updated `README_FOR_CLAUDE.md` (data file list, script list, running
+Lightly updated `docs/ANALYSIS_GUIDE.md` (data file list, script list, running
 order, write-up section) so it stays an accurate entry point for reproducing
 everything — not explicitly required by the brief but it's the project's
 canonical map and leaving it silently stale after adding 4 new scripts and
@@ -351,8 +351,8 @@ canonical map and leaving it silently stale after adding 4 new scripts and
 Final verification before this commit: re-diffed `outputs/fig_per_allele.pdf`
 and `outputs/fig_volcano.pdf` (HLA-A's originals) against the Phase 1 git
 commit — still byte-identical (`md5` match). Confirmed no `git status`
-deletions anywhere under `outputs/`, `RESULTS_SUMMARY.md`, or
-`PRESENTATION_NOTES.md` (only additions/new files).
+deletions anywhere under `outputs/`, `docs/RESULTS_SUMMARY.md`, or
+`presentation/PRESENTATION_NOTES.md` (only additions/new files).
 
 Committed to git after this phase.
 
@@ -360,7 +360,7 @@ Committed to git after this phase.
 
 ## Phase 5 — pan-cancer NORMAL pool resolved to true cohort of origin
 
-Not overnight/unattended like Phases 1-4 — triggered by Anqi's actual reply
+This extension followed Anqi's reply
 to the "can we pull more BRCA normals?" question asked at the end of Phase
 4. Two things in her message: (1) 106 BRCA normals is already enough for a
 proportion comparison, no need to pull more; (2) she attached
@@ -372,7 +372,7 @@ every normal sample in it, and cross-referencing against the pan-cancer SJ
 files' Barcode column shows every one of the pooled `Cohort=="NORMAL"`
 barcodes (145 in the HLA-A pan file, 318 in HLA-B/C's) resolves to a real
 TCGA project -- 0 unresolved in both cases. That pool is exactly what
-`phase3_pancancer_descriptive.py`'s docstring calls "a separate cross-cohort
+`scripts/phase3_pancancer_descriptive.py`'s docstring calls "a separate cross-cohort
 normal-tissue pool ... not per-cancer-type matched normals." Resolving it
 turns that into real matched normals for whichever TCGA project also has
 tumor rows in the same pan file.
@@ -385,7 +385,7 @@ cohorts). Cohorts that DON'T get a new test and why: TCGA-LGG and TCGA-ACC
 have tumor rows but no TCGA project of that name anywhere in the 24-project
 sheet at all (no normal exists to resolve to); TCGA-THCA has 47 resolved
 normals but only 1 tumor sample; TCGA-UCEC has up to 79 tumor samples but
-only 1 resolved normal. Wrote `phase5_pancancer_matched_normal.py` to run
+only 1 resolved normal. Wrote `scripts/phase5_pancancer_matched_normal.py` to run
 the exact same headline (Fisher/Wilson/OR) machinery Phase 2 uses for BRCA,
 restricted to each of these cohorts one at a time, gated by the same Phase
 1 quarantine (HLA-B -> `outputs/UNVALIDATED_HLA_B_phase5_*`).
@@ -397,7 +397,7 @@ as Phase 2 does for BRCA (`hla_common.top_event_penetrance` +
 TCGA-CHOL and TCGA-HNSC only have 2-3 tumor samples carrying A\*11:01 each
 -- nowhere near that bar -- so the re-derivation said "nothing to exclude,"
 and the resulting headline numbers for HLA-A in both cohorts were "enriched
-in tumor." Before writing any of that into `RESULTS_SUMMARY.md`, opened the
+in tumor." Before writing any of that into `docs/RESULTS_SUMMARY.md`, opened the
 underlying per-pattern detail CSV to see which allele/pattern was actually
 driving each headline number (worth doing as a habit, not just when
 something looks suspicious) and found: 100% of both cohorts' original
@@ -424,12 +424,12 @@ raw-count pooling across cohorts isn't a proper stratified test.
 
 All 16 gene x cohort x event-class headline tests from this phase come back
 null (every OR 95% CI spans 1) -- consistent with, not contradicting, the
-BRCA-only story. Didn't touch `figures_overview.pdf` given an all-null
+BRCA-only story. Didn't touch `presentation/figures_overview.pdf` given an all-null
 result set doesn't earn a 6th panel in an already-tuned 5-panel figure;
 `outputs/fig_phase5_matched_normal.pdf` stands alone instead. Updated
-`RESULTS_SUMMARY.md` (Finding 6, Bottom line), `PRESENTATION_NOTES.md`
+`docs/RESULTS_SUMMARY.md` (Finding 6, Bottom line), `presentation/PRESENTATION_NOTES.md`
 (bullets 11-12, corrected the now-stale "more normals" next-step to reflect
-Anqi's actual answer), and `README_FOR_CLAUDE.md` (data file, script #10,
+Anqi's actual answer), and `docs/ANALYSIS_GUIDE.md` (data file, script #10,
 key outputs). Moved `gdc_sample_sheet_normal_with_hla.tsv` into `data/`
 (it arrived at the project root) to match the project's existing
 data/root/outputs layout convention.
@@ -477,11 +477,11 @@ this same list is also in `outputs/FINAL_REVIEW.md`.)
 3. **A mid-run bug (Phase 2) would have silently corrupted HLA-A's own
    canonical figures** (`outputs/fig_per_allele.pdf`, `outputs/fig_volcano.pdf`)
    by deleting or mislabeling them with B/C data, due to
-   `analyze_brca.py`'s plotting functions writing to fixed filenames. Caught
+   `scripts/analyze_brca.py`'s plotting functions writing to fixed filenames. Caught
    by diffing against the Phase 1 git commit rather than assuming success,
    fixed with an isolated scratch directory, and re-verified byte-identical
    after every subsequent phase. Flagging because it's exactly the kind of
-   thing that's easy to miss when running unattended — worth a human glance
+   point that warrants a follow-up review
    at those two files to confirm they still look like the familiar
    single-gene HLA-A figures.
 4. **The pan-cancer `BRCA_NORMAL`/`Type=tumor` mislabeling was worked
@@ -491,7 +491,7 @@ this same list is also in `outputs/FINAL_REVIEW.md`.)
    maintains that export pipeline.
 5. **Every tumor-vs-normal number in this entire project (HLA-A and HLA-C
    alike) is underpowered and none survive multiple-testing correction.**
-   Both `RESULTS_SUMMARY.md` and `PRESENTATION_NOTES.md` were written to
+   Both `docs/RESULTS_SUMMARY.md` and `presentation/PRESENTATION_NOTES.md` were written to
    make this hard to drop accidentally in a live presentation, but it's
    worth a deliberate reminder before presenting — especially HLA-C's
    intron5_retention number, whose direction happens to match the MHC
@@ -502,7 +502,7 @@ this same list is also in `outputs/FINAL_REVIEW.md`.)
    `min_carriers=3`, `local_rate_threshold=0.1`, the 80%/5% penetrance
    gates for the constitutive-artifact check) were applied to B/C
    unchanged, without their own gene-specific sensitivity sweep (Phase 1/2
-   scope didn't include re-running `additional_analyses.py`'s
+   scope didn't include re-running `scripts/additional_analyses.py`'s
    threshold-sensitivity sweep for B/C — only HLA-A's original sweep from
    the prior session covers this). If HLA-C's headline numbers need to
    survive real scrutiny (not just a lab meeting), that sweep should be
@@ -511,7 +511,7 @@ this same list is also in `outputs/FINAL_REVIEW.md`.)
    headline for HLA-A** turned out, on inspection, to just be A\*11:01
    itself in 3 different cohorts, not 3 independent constitutive alleles —
    correctly caught and written up that way in
-   `outputs/PHASE3_pancancer_descriptive.md`/`RESULTS_SUMMARY.md`, but
+   `outputs/PHASE3_pancancer_descriptive.md`/`docs/RESULTS_SUMMARY.md`, but
    flagging because a less careful read of just the summary count ("3
    combinations flagged") could be misread as 3 separate findings if
    someone skims only the number.
@@ -530,5 +530,5 @@ this same list is also in `outputs/FINAL_REVIEW.md`.)
    design, not just a one-off Phase 5 bug: any *future* script that calls
    it on a small single-cohort slice without also applying the
    project-wide known-artifact list will make the same mistake. Worth a
-   comment or guard in `hla_common.py` itself if this pattern gets reused
+   comment or guard in `scripts/hla_common.py` itself if this pattern gets reused
    again, rather than re-deriving the fix ad hoc each time.

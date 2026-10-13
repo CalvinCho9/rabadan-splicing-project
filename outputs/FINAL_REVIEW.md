@@ -1,14 +1,14 @@
 # Final review — HLA-A/B/C, per gene
 
-Written at the end of the overnight B/C run (Phases 1-4). One paragraph per
+Written at the end of the HLA-B/C analysis (Phases 1-4). One paragraph per
 gene, explicitly tagged with what kind of result each claim is: **real**
 (a finding worth stating with confidence), **null** (a proper test that
 found no effect), **artifact** (a signal that turned out not to be
 biological), **underpowered** (can't tell either way — not the same as
 null), or **quarantined** (not trusted enough to present at all). Full
-detail and every judgment call behind these calls: `OVERNIGHT_LOG.md`.
-Presentation framing: `PRESENTATION_NOTES.md`. Full narrative:
-`RESULTS_SUMMARY.md`.
+detail and every judgment call behind these calls: `docs/ANALYSIS_LOG.md`.
+Presentation framing: `presentation/PRESENTATION_NOTES.md`. Full narrative:
+`docs/RESULTS_SUMMARY.md`.
 
 ---
 
@@ -124,14 +124,14 @@ important first:
    Verified byte-identical to the pre-bug committed version after the fix,
    and re-verified after every subsequent phase — but worth a human glance
    at `outputs/fig_per_allele.pdf` and `outputs/fig_volcano.pdf` (the
-   plain, HLA-A-only ones, still referenced by `RESULTS_SUMMARY.md`
+   plain, HLA-A-only ones, still referenced by `docs/RESULTS_SUMMARY.md`
    Findings 1-3) to confirm they look like the familiar single-gene A
    figures and not anything B/C-shaped.
 5. **Every tumor-vs-normal number in this project (A and C alike) is
    underpowered, none significant after correction.** Easy to accidentally
    overstate in a live presentation by dropping the "not significant"
-   caveat under time pressure — Findings 2 and 4 in `RESULTS_SUMMARY.md`
-   and bullets 3/4/8 in `PRESENTATION_NOTES.md` are written to make the
+   caveat under time pressure — Findings 2 and 4 in `docs/RESULTS_SUMMARY.md`
+   and bullets 3/4/8 in `presentation/PRESENTATION_NOTES.md` are written to make the
    caveat hard to drop, but worth a deliberate reminder before Friday.
 6. **HLA-C intron5_retention's paper-matching direction rests on n=1**
    (a single normal-side carrier, 1/106). It would take only one different
@@ -154,7 +154,7 @@ Two things worth folding into how each gene's status is described:
   more than expected — a per-cohort re-derivation of the exclusion (as used
   elsewhere) missed it in these smaller cohorts and would have produced a
   false "cohort-specific enrichment" if not caught before presenting. See
-  `OVERNIGHT_LOG.md` Phase 5 for the near-miss.
+  `docs/ANALYSIS_LOG.md` Phase 5 for the near-miss.
 - **HLA-C:** the `hla_c_03_04`-family candidate (item 6 above, previously
   resting on n=1) now has 3 more independent cohorts pointing the same
   direction (42 tumor vs 2 normal pooled across 4 cohorts) — still not
@@ -163,4 +163,4 @@ Two things worth folding into how each gene's status is described:
   "real."
 
 Full detail: `outputs/PHASE5_pancancer_matched_normal.md`,
-`RESULTS_SUMMARY.md` Finding 6.
+`docs/RESULTS_SUMMARY.md` Finding 6.

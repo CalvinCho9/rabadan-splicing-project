@@ -5,9 +5,9 @@ make_background_figures.py
 Explanatory (not data-driven) graphics for the background/method section of
 a talk: what the pipeline actually does (panel A) and what "exon5_skip" /
 "intron5_retention" geometrically mean (panel B). Pure schematic -- no real
-numbers are plotted here; see figures_overview.pdf / outputs/ for results.
+numbers are plotted here; see presentation/figures_overview.pdf / outputs/ for results.
 
-Output: background_method.pdf (project root)
+Output: presentation/background_method.pdf (presentation folder)
 ================================================================================
 """
 from pathlib import Path
@@ -152,7 +152,7 @@ def main():
     panel_b(ax_b)
     fig.suptitle("Background & method: how an HLA-A splice-junction file becomes a tumor-vs-normal test",
                  fontsize=14, y=1.01)
-    outpath = Path("background_method.pdf")
+    outpath = Path("presentation/background_method.pdf")
     fig.savefig(outpath, bbox_inches="tight")
     plt.close(fig)
     print(f"wrote {outpath}")

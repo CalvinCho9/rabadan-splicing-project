@@ -2,7 +2,7 @@
 """
 phase2_bc_headline.py
 ================================================================================
-PHASE 2 (overnight B/C run): HLA-B/C tumor-vs-normal headline comparison,
+PHASE 2 (HLA-B/C analysis): HLA-B/C tumor-vs-normal headline comparison,
 per-allele view, and volcano -- the same statistics analyze_brca.py runs for
 HLA-A (Fisher exact + Wilson CIs + odds ratio, BH-FDR across patterns),
 applied to B and C, with the Phase 1 verdict and quarantine rule applied.
@@ -170,7 +170,7 @@ def run_gene(gene, tumor_path, normal_path):
             f"all for this gene.\n\n"
             f"These files are the same computations Phase 2 runs for validated genes, kept "
             f"here for audit/reference ONLY. **Do not fold any number from these files into "
-            f"RESULTS_SUMMARY.md, PRESENTATION_NOTES.md, or figures_overview.pdf** unless a "
+            f"docs/RESULTS_SUMMARY.md, presentation/PRESENTATION_NOTES.md, or presentation/figures_overview.pdf** unless a "
             f"manual strand/geometry review specifically validates {gene}.\n\n"
             f"Pending manual review: (1) confirm with the alignment/reference-construction "
             f"pipeline (outside this repo) whether personalized HLA-B contigs are built "

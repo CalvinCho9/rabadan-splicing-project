@@ -2,7 +2,7 @@
 """
 phase1_bc_strand_check.py
 ================================================================================
-PHASE 1 (overnight B/C run): does the HLA-A exon5_skip/intron5_retention
+PHASE 1 (HLA-B/C analysis): does the HLA-A exon5_skip/intron5_retention
 geometry classifier need adjustment for HLA-B/C, which are reverse-strand
 genes?
 
@@ -212,7 +212,7 @@ def decide_verdict(result):
                 f"intron5_retention carriers naive, {flipped_hit} flipped (out of {result['n_events']} "
                 f"total candidate AS events across {result['n_tumor']}+{result['n_normal']} samples -- "
                 f"this gene's max observed Local_rate and overall AS-event yield are much lower than "
-                f"A/the other B/C gene; see OVERNIGHT_LOG.md). Insufficient data to tell whether the "
+                f"A/the other B/C gene; see docs/ANALYSIS_LOG.md). Insufficient data to tell whether the "
                 f"classifier needs a strand fix for this gene at all.")
     if naive_hit > flipped_hit + 1:
         return ("valid_as_is",
@@ -313,7 +313,7 @@ def write_report(results, verdicts):
                           f"Per the quarantine rule, {g}'s tumor-vs-normal exon5_skip/intron5_retention "
                           f"results go to `outputs/UNVALIDATED_{g.replace('-', '_')}_*` ONLY, marked "
                           f"'NOT FOR PRESENTATION -- pending manual strand review', and are excluded from "
-                          f"RESULTS_SUMMARY.md / PRESENTATION_NOTES.md / figures_overview.pdf.")
+                          f"docs/RESULTS_SUMMARY.md / presentation/PRESENTATION_NOTES.md / presentation/figures_overview.pdf.")
     lines.append("")
 
     out_path = OUTDIR / "PHASE1_BC_strand_check.md"

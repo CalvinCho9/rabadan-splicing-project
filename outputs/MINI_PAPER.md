@@ -1,9 +1,9 @@
 # A focused reproduction of the MHC Hammer exon-5 splicing axis in TCGA-BRCA HLA-A/B/C: an underpowered null and a characterized constitutive-splicing confounder
 
-*Internal report. Sources: `METHODS.md`, `RESULTS_SUMMARY.md`, `PRESENTATION_NOTES.md`,
-`outputs/FINAL_REVIEW.md`, `OVERNIGHT_LOG.md`, `outputs/PHASE1_BC_strand_check.md`,
+*Internal report. Sources: `docs/METHODS.md`, `docs/RESULTS_SUMMARY.md`, `presentation/PRESENTATION_NOTES.md`,
+`outputs/FINAL_REVIEW.md`, `docs/ANALYSIS_LOG.md`, `outputs/PHASE1_BC_strand_check.md`,
 `outputs/PHASE3_pancancer_descriptive.md`, `outputs/PHASE5_pancancer_matched_normal.md`,
-`outputs/FIGURE_AUDIT.md`, `ANNOTATION_ARTIFACT_NOTE.md`,
+`outputs/FIGURE_AUDIT.md`, `docs/ANNOTATION_ARTIFACT_NOTE.md`,
 `outputs/scratch/OPEN_QUESTIONS_DIAGNOSTIC.md`, and the CSVs under `outputs/`.
 Every number below traces to one of these files; where a number is not available
 from them, it is marked `[verify: …]` rather than estimated.*
@@ -89,7 +89,7 @@ project's two most important findings (below).
 
 ## Methods
 
-Full detail, thresholds, and line-level code references: `METHODS.md`. Summary,
+Full detail, thresholds, and line-level code references: `docs/METHODS.md`. Summary,
 in pipeline order:
 
 1. **Upstream, outside this repo (not verified here).** Raw TCGA-BRCA BAMs
@@ -190,7 +190,7 @@ in pipeline order:
 | `exclude_alleles` (HLA-A) | `hla_a_11_01` | Re-derived per gene for B/C; none flagged |
 | Constitutive-artifact gates | `HIGH_PENETRANCE=80%`, `LOW_PENETRANCE=5%`, `min_n=10` | No |
 
-Full table with rationale: `METHODS.md` §9.
+Full table with rationale: `docs/METHODS.md` §9.
 
 ---
 
@@ -215,7 +215,7 @@ confirms the code runs on a new file, not that the exon5_skip/intron5_retention
 analysis is valid for every gene it can run on. Per-gene analysis validity
 was checked separately (Methods §5), and HLA-B failed that check (§6) even
 though the same code executed without error on HLA-B's data too.
-*Figures:* `figures_overview.pdf`; no dedicated figure for this check.
+*Figures:* `presentation/figures_overview.pdf`; no dedicated figure for this check.
 
 ### 2. BRCA tumor-vs-normal: a null, led by its power, not by its p-value
 
@@ -248,7 +248,7 @@ specific cutoff choice. **0 of 6 tested per-pattern comparisons survive
 BH-FDR q<0.05** in the full per-pattern table.
 *Figures:* `outputs/fig_classes.pdf`, `outputs/fig_threshold_sensitivity.pdf`,
 `outputs/fig_volcano.pdf` (nominal-vs-FDR significance line labeled per
-`outputs/FIGURE_AUDIT.md`), `figures_overview.pdf` panels A1/C.
+`outputs/FIGURE_AUDIT.md`), `presentation/figures_overview.pdf` panels A1/C.
 
 ### 3. HLA-A\*11:01: a constitutive splice isoform, not tumor biology — the strongest finding in the project
 
@@ -256,7 +256,7 @@ The `hla_a_11_01` allele's top recurrent event (`2365_2806->2383_2806`,
 classified `intron5_retention`) is present in **96.7% of tumor carriers
 (118/122)** and **100% of normal carriers (19/19)** — no other allele in the
 cohort comes close, and the rate is identical whether the sample is tumor or
-normal (`ANNOTATION_ARTIFACT_NOTE.md`). A read-share check rules out the
+normal (`docs/ANNOTATION_ARTIFACT_NOTE.md`). A read-share check rules out the
 simplest explanation (a reference-coordinate swap): the **annotated**
 junction stays the majority isoform at ~72.4% of local reads on average in
 both groups, so this looks like a real, fixed, ~25–30%-penetrant minor
@@ -273,13 +273,13 @@ in the pooled normal-tissue reference, 100% (3/3) in TCGA-CHOL, and 85.7%
 pan-cancer cohorts, 30/33 (91%) of A\*11:01 carriers show the pattern — this
 is not a BRCA-specific quirk.
 *Figures:* `outputs/fig_per_allele.pdf` / `outputs/fig_per_allele_talk.pdf`,
-`figures_overview.pdf` panels B and D.
+`presentation/figures_overview.pdf` panels B and D.
 
 ### 4. HLA-C: very likely a *second* constitutive artifact, truncated by our threshold — not tumor-enrichment [RESOLVED]
 
 HLA-C's own recurrent candidate — `hla_c_03_04`/`hla_c_03_03`, pattern
 `1273_1711->1291_1711`, classified `intron5_retention` — was previously
-reported in this project's other documents (`RESULTS_SUMMARY.md` Finding 4/6)
+reported in this project's other documents (`docs/RESULTS_SUMMARY.md` Finding 4/6)
 as a `real_variable_splicing_candidate` with a tumor-enriched odds ratio
 (OR 3.37) and cross-cohort directional corroboration. **That framing is
 retired here.** MHC Hammer reports HLA-C\*03:04 partial intron-5 retention

@@ -2,7 +2,7 @@
 """
 phase3_pancancer_descriptive.py
 ================================================================================
-PHASE 3 (overnight B/C run): pan-cancer DESCRIPTIVE pass for HLA-A/B/C.
+PHASE 3 (HLA-B/C analysis): pan-cancer DESCRIPTIVE pass for HLA-A/B/C.
 
 Explicitly descriptive -- NOT a tumor-vs-normal test. Most cohorts in these
 files have no matched normal (they're tumor-only pulls); the "NORMAL" cohort
@@ -15,13 +15,13 @@ wrong. This script does two things only, per gene:
      AS_pattern -- descriptive cohort context, same shape as Phase 1's
      per-allele check but broken out by Cohort.
   2. A targeted check: does HLA-A*11:01's specific constitutive junction
-     (2365_2806->2383_2806, established in ANNOTATION_ARTIFACT_NOTE.md as
+     (2365_2806->2383_2806, established in docs/ANNOTATION_ARTIFACT_NOTE.md as
      ~97-100% penetrant in BRCA tumor+normal) recur at similarly high
      penetrance in OTHER cancer types and the separate normal pool? And,
      symmetrically, does any HLA-B/C allele show a similar cross-cohort
      near-universal pattern (a "B/C equivalent" of the A*11:01 artifact)?
 
-Data-quality note (see OVERNIGHT_LOG.md): pan_HLA-B_SJ_combined.tsv and
+Data-quality note (see docs/ANALYSIS_LOG.md): pan_HLA-B_SJ_combined.tsv and
 pan_HLA-C_SJ_combined.tsv both contain a Cohort=="BRCA_NORMAL" block whose
 Type reads "tumor" -- row counts match the real BRCA normal exports exactly,
 strongly suggesting a mislabeled Type in that block. Per "never fabricate,
@@ -76,7 +76,7 @@ def load_pan_gene(gene, path):
         excluded_rows = int(mask.sum())
         print(f"  [{gene}] excluding Cohort=='BRCA_NORMAL' block: {excluded_rows} rows, "
               f"{df.loc[mask, 'Barcode'].nunique()} barcodes (Type mislabeled 'tumor' in source file "
-              f"-- row count matches the real BRCA normal export exactly; see OVERNIGHT_LOG.md). "
+              f"-- row count matches the real BRCA normal export exactly; see docs/ANALYSIS_LOG.md). "
               f"BRCA is already covered by Phase 2's dedicated export files.")
         df = df.loc[~mask].copy()
     df = ab.compute_derived_columns(df)
@@ -201,7 +201,7 @@ def write_report(results):
         "**Data-quality note applied:** `pan_HLA-B_SJ_combined.tsv` / `pan_HLA-C_SJ_combined.tsv` "
         "contain a `Cohort==\"BRCA_NORMAL\"` block with `Type` mislabeled `\"tumor\"` (row count "
         "matches the real BRCA normal export exactly). Excluded entirely from this analysis rather "
-        "than trusted or silently corrected -- see `OVERNIGHT_LOG.md`. BRCA is already covered "
+        "than trusted or silently corrected -- see `docs/ANALYSIS_LOG.md`. BRCA is already covered "
         "properly by Phase 2.\n"
     )
     lines.append("## Quarantine\n")
@@ -210,7 +210,7 @@ def write_report(results):
         "gene-level quarantine rule, ALL HLA-B Phase 3 output — including this per-cohort penetrance "
         "table, which does not itself depend on the exon5_skip/intron5_retention classification — is "
         "written under `outputs/UNVALIDATED_HLA_B_pancancer_*` and excluded from "
-        "`RESULTS_SUMMARY.md`/`PRESENTATION_NOTES.md`/`figures_overview.pdf`, in keeping with 'when in "
+        "`docs/RESULTS_SUMMARY.md`/`presentation/PRESENTATION_NOTES.md`/`presentation/figures_overview.pdf`, in keeping with 'when in "
         "doubt, quarantine.'\n"
     )
 
@@ -256,7 +256,7 @@ def write_report(results):
                               f"n=3 there is too small to weigh against the other three cohorts. Pooled "
                               f"across all pan-cancer cohorts: {total_k}/{total_n} "
                               f"({100*total_k/total_n:.0f}%) A*11:01 carriers show the pattern. This is "
-                              f"a genuinely useful generalization of Finding 3 from `ANNOTATION_ARTIFACT_NOTE.md` "
+                              f"a genuinely useful generalization of Finding 3 from `docs/ANNOTATION_ARTIFACT_NOTE.md` "
                               f"-- still descriptive (no denominator here is a proper matched-normal "
                               f"comparison), but it strengthens the case that this is a real, fixed "
                               f"minor isoform of the A*11:01 reference transcript and not a BRCA-cohort "

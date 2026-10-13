@@ -5,7 +5,7 @@ document was modified. No pipeline default (`local_rate_threshold`,
 `exon_skip_min_jump`, `intron_retention_max_shift`, or any other parameter)
 was changed in place — the Q2 re-classification below passes
 `local_rate_threshold=0.02` as an explicit function argument to
-`analyze_brca.py`'s existing, unmodified `find_as_events()`, in a standalone
+`scripts/analyze_brca.py`'s existing, unmodified `find_as_events()`, in a standalone
 in-memory Python session; no source file was edited and no `outputs/*.csv`
 was overwritten.
 
@@ -53,10 +53,10 @@ tables), as expected since `intron5_retention` is each allele's top pattern.
 > A\*11:01-like artifact), NOT tumor-enrichment — REQUIRES my confirmation.
 
 What I can say from the repo alone, without asserting the biological call:
-the repo's own `add_verdict()` logic (`hla_common.py`) labeled both alleles
+the repo's own `add_verdict()` logic (`scripts/hla_common.py`) labeled both alleles
 `real_variable_splicing_candidate`, not `constitutive_annotation_artifact` —
 but that verdict is a `min_n=10`-gated, `HIGH_PENETRANCE=80`/`LOW_PENETRANCE=5`
-threshold rule (see `hla_common.py:176-190`), not evidence against your
+threshold rule (see `scripts/hla_common.py:176-190`), not evidence against your
 hypothesis; it only says the observed tumor/normal percentages in this data,
 as measured at `local_rate_threshold=0.1`, didn't clear the 80% bar the repo
 already uses elsewhere to call something constitutive-like. Whether that
@@ -80,14 +80,14 @@ export TSVs (junction coordinates + read counts) and the GDC sample sheet —
 no sequence or annotation file. The repo's own documentation confirms this
 directly and repeatedly:
 
-- `METHODS.md:14`: "Per-patient personalized reference construction + STAR
+- `docs/METHODS.md:14`: "Per-patient personalized reference construction + STAR
   alignment... **Not verified in this repo** — the reference-construction
   and alignment code is not present here."
-- `METHODS.md:135`: "the personalized per-patient reference contigs for
+- `docs/METHODS.md:135`: "the personalized per-patient reference contigs for
   HLA-B/C were likely already reverse-complemented at reference-construction
   time... **This is an unverified assumption about a step outside this
   repo**."
-- `OVERNIGHT_LOG.md:110-120, 457-468`: documents this as an *inference*,
+- `docs/ANALYSIS_LOG.md:110-120, 457-468`: documents this as an *inference*,
   never confirmed against the actual upstream reference-construction code,
   and lists confirming it with whoever built the personalized HLA-B/C
   references as an open follow-up item.
@@ -113,7 +113,7 @@ from general knowledge.
 
 ### Diagnostic re-classification (HLA-A, in-memory only)
 
-Ran `analyze_brca.py`'s existing, unmodified `load_data()` →
+Ran `scripts/analyze_brca.py`'s existing, unmodified `load_data()` →
 `compute_derived_columns()` → `find_as_events()` → `annotate_events()` →
 `classify_events()` functions in a standalone Python session (not `main()`,
 no CLI, no file writes), first at the real default
@@ -130,7 +130,7 @@ denominators the presented HLA-A headline uses).
 | 0.02 (diagnostic only) | 69 | 8 | 44 | 7 |
 
 The 0.10-threshold row/carrier counts here (2 rows / 1 distinct carrier,
-tumor; 0/0, normal) match exactly what `analyze_brca.py`'s presented
+tumor; 0/0, normal) match exactly what `scripts/analyze_brca.py`'s presented
 pipeline already reports (`table_headline_classes_all_alleles.csv`: tumor
 1/935 = 0.1%, normal 0/106 = 0.0%), confirming this diagnostic re-run used
 the identical code path as the presented output and isn't a divergent

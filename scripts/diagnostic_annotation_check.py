@@ -30,7 +30,7 @@ Four things, in order:
 Output:
     outputs/annotation_artifact_check.csv           (table for #3 + #4)
     outputs/annotation_artifact_raw_rows_hla_a_11_01.csv   (table for #1)
-    ANNOTATION_ARTIFACT_NOTE.md                      (plain-English writeup)
+    docs/ANNOTATION_ARTIFACT_NOTE.md                      (plain-English writeup)
 ================================================================================
 """
 
@@ -289,7 +289,7 @@ def main():
     print(f"\n  -> {out_csv}")
 
     write_note(penetrance, share_summary)
-    print("\n  -> ANNOTATION_ARTIFACT_NOTE.md")
+    print("\n  -> docs/ANNOTATION_ARTIFACT_NOTE.md")
     print("\nDone. Main analysis (analyze_brca.py outputs) untouched.")
 
 
@@ -375,7 +375,7 @@ def write_note(penetrance, share_summary):
         "simple coordinate swap.\n"
     )
 
-    (Path(".") / "ANNOTATION_ARTIFACT_NOTE.md").write_text("\n".join(lines))
+    (Path(".") / "docs/ANNOTATION_ARTIFACT_NOTE.md").write_text("\n".join(lines))
 
 
 if __name__ == "__main__":
