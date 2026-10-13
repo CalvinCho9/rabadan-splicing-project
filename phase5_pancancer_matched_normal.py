@@ -279,8 +279,17 @@ def plot_summary(summary, outpath):
             ax.annotate(f"p={r['Fisher_p']:.2g}", (i, max(r["Tumor_CI_high"], r["Normal_CI_high"]) + 1),
                         ha="center", fontsize=7)
     axes[0].legend()
+    # Tested/significant counts pulled from columns already computed by
+    # ab.headline_comparison() (OR_CI_low/OR_CI_high) -- same arithmetic
+    # write_report() already runs on this same `summary` frame, just
+    # surfaced on the figure too so a null result reads as "tested and
+    # null", not "empty because nothing was tested".
+    n_tested = len(presented)
+    n_sig = int(((presented["OR_CI_low"] > 1) | (presented["OR_CI_high"] < 1)).sum())
     fig.suptitle("Phase 5: pan-cancer matched tumor-vs-normal (NORMAL pool resolved to true cohort of origin)\n"
-                 "HLA-B excluded (quarantined, see Phase 1)")
+                 "HLA-B excluded (quarantined, see Phase 1)\n"
+                 f"{n_tested} gene×cohort×class tests shown, {n_sig} with OR 95% CI excluding 1 "
+                 f"(nominal, not FDR-corrected)")
     fig.tight_layout()
     fig.savefig(outpath)
     plt.close(fig)

@@ -508,22 +508,42 @@ def cohort_overview(df, events, outdir):
 # 9. Per-sample event burden: total AS-event count per sample, tumor vs normal
 # ==============================================================================
 def plot_event_burden(counts, outdir):
-    """Boxplot of AS events per sample (summed over both alleles), tumor vs
-    normal, with a Mann-Whitney U test (non-parametric -- event counts are
-    small non-negative integers, not remotely normal)."""
+    """AS events per sample (summed over both alleles), tumor vs normal, with
+    a Mann-Whitney U test (non-parametric -- event counts are small
+    non-negative integers, not remotely normal).
+
+    Grouped bar of % of samples at each observed event count, not a boxplot:
+    counts are so zero-inflated (>80% of samples in both arms have exactly 0
+    events) that a boxplot collapses to a flat line at 0 with fliers -- an
+    honest number, unreadable chart. The bar chart shows the exact same
+    per-sample N_events distribution, just legibly."""
     tumor_vals = counts.loc[counts["Type"] == "tumor", "N_events"].to_numpy()
     normal_vals = counts.loc[counts["Type"] == "normal", "N_events"].to_numpy()
 
     u_stat, p_value = mannwhitneyu(tumor_vals, normal_vals, alternative="two-sided")
 
-    fig, ax = plt.subplots(figsize=(4.5, 5))
-    bp = ax.boxplot([tumor_vals, normal_vals], tick_labels=["Tumor", "Normal"],
-                     patch_artist=True, showfliers=True, widths=0.5)
-    for patch, color in zip(bp["boxes"], [TUMOR_COLOR, NORMAL_COLOR]):
-        patch.set_facecolor(color)
-        patch.set_alpha(0.55)
-    ax.set_ylabel("AS events per sample (both alleles)")
-    ax.set_title(f"Per-sample AS-event burden\nMann-Whitney U p = {p_value:.3g}")
+    max_events = int(max(tumor_vals.max(), normal_vals.max())) if len(tumor_vals) and len(normal_vals) else 0
+    bins = np.arange(max_events + 1)
+    tumor_pct = np.array([100 * (tumor_vals == b).sum() / len(tumor_vals) for b in bins])
+    normal_pct = np.array([100 * (normal_vals == b).sum() / len(normal_vals) for b in bins])
+
+    fig, ax = plt.subplots(figsize=(6.5, 5.5))
+    width = 0.35
+    ax.bar(bins - width / 2, tumor_pct, width, label="Tumor", color=TUMOR_COLOR)
+    ax.bar(bins + width / 2, normal_pct, width, label="Normal", color=NORMAL_COLOR)
+    ax.set_xticks(bins)
+    ax.set_xlabel("AS events per sample (both alleles)")
+    ax.set_ylabel("% of samples")
+    ax.set_ylim(0, 100)
+    tumor_carrier_pct = 100 * (tumor_vals > 0).sum() / len(tumor_vals) if len(tumor_vals) else float("nan")
+    normal_carrier_pct = 100 * (normal_vals > 0).sum() / len(normal_vals) if len(normal_vals) else float("nan")
+    ax.set_title(
+        f"Per-sample AS-event burden (n_tumor={len(tumor_vals)}, n_normal={len(normal_vals)})\n"
+        f"Mann-Whitney U p = {p_value:.3g}\n"
+        f">=1 event: tumor {tumor_carrier_pct:.0f}%, normal {normal_carrier_pct:.0f}%",
+        fontsize=11,
+    )
+    ax.legend(frameon=False)
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     fig.tight_layout()
@@ -604,9 +624,11 @@ def per_allele_view(df, events, min_allele_samples=20, classes=("exon5_skip", "i
     return result, common_alleles
 
 
-def plot_per_allele(per_allele, outdir, classes=("exon5_skip", "intron5_retention")):
+def plot_per_allele(per_allele, outdir, gene_label, classes=("exon5_skip", "intron5_retention"),
+                     filename="fig_per_allele.pdf", title_suffix=""):
+    outpath = outdir / filename
     if per_allele.empty:
-        print("  no alleles meet --min-allele-samples -- skipping fig_per_allele.pdf")
+        print(f"  no alleles meet --min-allele-samples -- skipping {outpath}")
         return
     alleles = sorted(per_allele["Contig_rd"].unique())
     ncols = min(3, len(alleles))
@@ -657,9 +679,18 @@ def plot_per_allele(per_allele, outdir, classes=("exon5_skip", "intron5_retentio
         axes[j // ncols][j % ncols].axis("off")
 
     handles = [Patch(facecolor=TUMOR_COLOR, label="Tumor"), Patch(facecolor=NORMAL_COLOR, label="Normal")]
-    fig.legend(handles=handles, loc="outside upper right", frameon=False)
-    fig.suptitle("HLA-A exon5_skip / intron5_retention by allele (95% Wilson CI)", fontsize=13)
-    outpath = outdir / "fig_per_allele.pdf"
+    if ncols >= 3:
+        # wide enough that a fig-level legend "outside upper right" clears
+        # the suptitle horizontally, even when title_suffix wraps to 2 lines
+        fig.legend(handles=handles, loc="outside upper right", frameon=False)
+    else:
+        # narrow grid (talk-view subsets can be as few as 1-2 columns): a
+        # fig-level legend at this width sits directly under a wrapped
+        # 2-line suptitle and overlaps it -- anchor inside the last axes'
+        # own corner instead, which stays clear of the suptitle regardless
+        # of how many lines title_suffix adds
+        axes[0][-1].legend(handles=handles, loc="upper right", fontsize=8, frameon=False)
+    fig.suptitle(f"{gene_label} exon5_skip / intron5_retention by allele (95% Wilson CI){title_suffix}", fontsize=13)
     fig.savefig(outpath)
     plt.close(fig)
     print(f"  wrote {outpath}")
@@ -685,9 +716,10 @@ def volcano_data(detailed, min_carriers=3):
     return d
 
 
-def plot_volcano(volcano, outdir, label_n=6):
+def plot_volcano(volcano, outdir, gene_label, label_n=6, filename="fig_volcano.pdf"):
+    outpath = outdir / filename
     if volcano.empty:
-        print("  no patterns meet --min-carriers -- skipping fig_volcano.pdf")
+        print(f"  no patterns meet --min-carriers -- skipping {outpath}")
         return
     class_color = {"exon5_skip": "#8e44ad", "intron5_retention": "#16a085", "other": "#999999"}
     colors = volcano["Event_class"].map(class_color).fillna("#999999")
@@ -710,12 +742,24 @@ def plot_volcano(volcano, outdir, label_n=6):
                     fontsize=6, xytext=(dx, dy), textcoords="offset points",
                     ha="center", arrowprops=dict(arrowstyle="-", lw=0.5, color="gray"), zorder=4)
 
-    ax.axhline(-np.log10(0.05), color="gray", linestyle="--", linewidth=0.8)
+    nominal_line = -np.log10(0.05)
+    ax.axhline(nominal_line, color="gray", linestyle="--", linewidth=0.8)
+    ax.text(ax.get_xlim()[1] if ax.get_xlim()[1] > 0 else 0, nominal_line, "  nominal p=0.05 (uncorrected)",
+            color="gray", fontsize=7, va="bottom", ha="left")
     ax.axvline(0, color="gray", linestyle="-", linewidth=0.6)
     ax.set_xlabel("log2( tumor carrier freq / normal carrier freq )")
     ax.set_ylabel("-log10( Fisher p )")
-    ax.set_title(f"HLA-A AS_pattern recurrence, tumor vs normal\n"
-                 f"(patterns with >= {int(volcano['Total_carriers'].min())} carriers shown)")
+
+    # tested-vs-significant counts pulled straight from the already-computed
+    # Tested/FDR_q columns (detailed_table()'s BH-FDR correction) -- no
+    # re-thresholding or recomputation here, just reporting what's already
+    # in the dataframe so a null result reads as "tested and null", not
+    # "empty because nothing was tested".
+    n_tested = int(volcano["Tested"].sum()) if "Tested" in volcano.columns else len(volcano)
+    n_sig = int((volcano["FDR_q"] < 0.05).sum()) if "FDR_q" in volcano.columns else 0
+    ax.set_title(f"{gene_label} AS_pattern recurrence, tumor vs normal\n"
+                 f"(patterns with >= {int(volcano['Total_carriers'].min())} carriers shown)\n"
+                 f"{n_tested} patterns tested, {n_sig} significant after BH-FDR q<0.05")
     # legend sits outside the plotting area entirely -- with this few points
     # spanning the full axes, any in-plot corner risks covering a marker/label
     handles = [Patch(facecolor=c, label=k) for k, c in class_color.items()]
@@ -725,7 +769,6 @@ def plot_volcano(volcano, outdir, label_n=6):
     ymax = volcano["neglog10_Fisher_p"].max()
     ax.set_ylim(-0.05 * max(ymax, 1), max(ymax, 1) * 1.3)
     fig.tight_layout()
-    outpath = outdir / "fig_volcano.pdf"
     fig.savefig(outpath, bbox_inches="tight")
     plt.close(fig)
     print(f"  wrote {outpath}")
@@ -735,7 +778,7 @@ def plot_volcano(volcano, outdir, label_n=6):
 # 12a. Figure: grouped bar chart, tumor vs normal carrier %, with 95% CI
 #      whiskers and Fisher p annotation
 # ==============================================================================
-def plot_classes(headline, outpath):
+def plot_classes(headline, outpath, gene_label):
     fig, ax = plt.subplots(figsize=(6, 4.5))
     x = np.arange(len(headline))
     width = 0.35
@@ -755,15 +798,26 @@ def plot_classes(headline, outpath):
     ax.set_xticks(x)
     ax.set_xticklabels(headline["Event_class"])
     ax.set_ylabel("Carrier samples (%, 95% Wilson CI)")
-    ax.set_title("HLA-A alternative splicing: tumor vs normal")
+    ax.set_title(f"{gene_label} alternative splicing: tumor vs normal")
 
     ymax = max(headline["Tumor_CI_high"].max(), headline["Normal_CI_high"].max(), 1)
     ax.set_ylim(0, ymax * 1.35)
     for i, row in headline.iterrows():
         top = max(row["Tumor_CI_high"], row["Normal_CI_high"])
-        ax.text(i, top + 0.04 * ymax,
-                f"Fisher p={row['Fisher_p']:.2g}\nOR={row['Odds_ratio']:.2f}\n{row['Direction']}",
-                ha="center", va="bottom", fontsize=8)
+        if gene_label == "HLA-C":
+            # Direction ("enriched"/"depleted" in tumor) is RETIRED for HLA-C
+            # (see MINI_PAPER.md Sec.4): intron5_retention's OR rests on a
+            # single normal-side carrier and is non-significant, so a
+            # directional claim isn't supported. Neutral caveat only --
+            # Fisher p and OR values are unchanged.
+            if row["Event_class"] == "intron5_retention":
+                caveat = f"not significant (rests on {int(row['Normal_carriers'])} normal carrier)"
+            else:
+                caveat = "not significant"
+            label = f"Fisher p={row['Fisher_p']:.2g}\nOR={row['Odds_ratio']:.2f}\n{caveat}"
+        else:
+            label = f"Fisher p={row['Fisher_p']:.2g}\nOR={row['Odds_ratio']:.2f}\n{row['Direction']}"
+        ax.text(i, top + 0.04 * ymax, label, ha="center", va="bottom", fontsize=8)
 
     ax.legend(frameon=False)
     ax.spines["top"].set_visible(False)
@@ -777,13 +831,21 @@ def plot_classes(headline, outpath):
 # ==============================================================================
 # 12b. Figure: samples x alleles heatmap, colored by AS_pattern
 # ==============================================================================
-def plot_heatmap(events, sample_type, base_cmap, outpath, title):
+def plot_heatmap(events, sample_type, base_cmap, outpath, title, max_rows_per_panel=60):
     """Only samples carrying >=1 event of this Type are shown. Columns are
     Contig_rd (2-field allele); a cell is colored by the AS_pattern(s) seen
     in that sample x allele (joined with '; ' if more than one). Palette is
     a single hue family (Reds for tumor, Blues for normal) sampled across
     the distinct patterns actually observed, per the domain convention of
-    tumor=red / normal=blue."""
+    tumor=red / normal=blue.
+
+    Samples are split into separate files (each capped at max_rows_per_panel
+    rows, suffixed _1/_2/_3/... when there's more than one) rather than one
+    tall single-column heatmap -- a cohort the size of tumor (~100+
+    carriers) renders as a figure many times taller than wide, which
+    doesn't fit a slide even sideways. Splitting into standalone files
+    (rather than side-by-side panels in one wide figure) means each one
+    drops onto its own slide at a normal, readable size."""
     sub = events[events["Type"] == sample_type]
     if sub.empty:
         print(f"  no {sample_type} events -- skipping {outpath}")
@@ -804,33 +866,45 @@ def plot_heatmap(events, sample_type, base_cmap, outpath, title):
     code_of = {p: i for i, p in enumerate(patterns)}
     code_matrix = wide.replace(code_of).astype(float).to_numpy()
 
-    fig_w = max(6, 0.5 * len(wide.columns) + 3)   # + room for legend
-    fig_h = max(4, 0.18 * len(wide.index))
-    fig, ax = plt.subplots(figsize=(fig_w, fig_h))
-
-    masked = np.ma.masked_invalid(code_matrix)
-    ax.pcolormesh(masked, cmap=ListedColormap(shades), edgecolors="black",
-                  linewidth=0.4, vmin=-0.5, vmax=max(n - 0.5, 0.5))
-    ax.set_xticks(np.arange(len(wide.columns)) + 0.5)
-    ax.set_xticklabels(wide.columns, rotation=90, fontsize=7)
-    ax.set_yticks(np.arange(len(wide.index)) + 0.5)
-    ax.set_yticklabels(wide.index, fontsize=6)
-    ax.invert_yaxis()  # first sample at top
-    ax.set_xlabel("Contig_rd (2-field allele)")
-    ax.set_ylabel("Barcode")
-    ax.set_title(title)
+    n_samples, n_alleles = code_matrix.shape
+    n_panels = int(np.ceil(n_samples / max_rows_per_panel))
+    panel_bounds = np.array_split(np.arange(n_samples), n_panels)
 
     # If there are many patterns the legend gets unwieldy -- that's expected
     # for tumor (more distinct events); consider capping to top-N by
     # frequency if this becomes unreadable on a bigger cohort.
     handles = [Patch(facecolor=shades[i], edgecolor="black", label=p) for i, p in enumerate(patterns)]
-    ax.legend(handles=handles, bbox_to_anchor=(1.02, 1), loc="upper left",
-              fontsize=6, title="AS_pattern", frameon=False)
 
-    fig.tight_layout()
-    fig.savefig(outpath, bbox_inches="tight")
-    plt.close(fig)
-    print(f"  wrote {outpath} ({len(wide.index)} samples x {len(wide.columns)} alleles, {n} patterns)")
+    fig_w = max(6, 0.5 * n_alleles + 3)   # + room for legend
+    written = []
+    for panel_i, idx in enumerate(panel_bounds):
+        part_outpath = outpath if n_panels == 1 else outpath.with_stem(f"{outpath.stem}_{panel_i + 1}")
+        part_title = title if n_panels == 1 else f"{title} ({panel_i + 1}/{n_panels})"
+
+        fig_h = max(4, 0.18 * len(idx))
+        fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+        masked = np.ma.masked_invalid(code_matrix[idx, :])
+        ax.pcolormesh(masked, cmap=ListedColormap(shades), edgecolors="black",
+                      linewidth=0.4, vmin=-0.5, vmax=max(n - 0.5, 0.5))
+        ax.set_xticks(np.arange(n_alleles) + 0.5)
+        ax.set_xticklabels(wide.columns, rotation=90, fontsize=7)
+        ax.set_yticks(np.arange(len(idx)) + 0.5)
+        ax.set_yticklabels(wide.index[idx], fontsize=6)
+        ax.invert_yaxis()  # first sample at top
+        ax.set_xlabel("Contig_rd (2-field allele)")
+        ax.set_ylabel("Barcode")
+        ax.set_title(part_title)
+        ax.legend(handles=handles, bbox_to_anchor=(1.02, 1), loc="upper left",
+                  fontsize=6, title="AS_pattern", frameon=False)
+
+        fig.tight_layout()
+        fig.savefig(part_outpath, bbox_inches="tight")
+        plt.close(fig)
+        written.append(part_outpath)
+
+    names = ", ".join(str(p) for p in written)
+    print(f"  wrote {names} ({len(wide.index)} samples x {len(wide.columns)} alleles, "
+          f"{n} patterns, {n_panels} file{'s' if n_panels != 1 else ''})")
 
 
 # ==============================================================================
@@ -918,13 +992,25 @@ def main():
     headline = headline_comparison(df, events_for_headline)
     print_headline_table(headline)
     headline.to_csv(args.outdir / "table_headline_classes.csv", index=False)
-    plot_classes(headline, args.outdir / "fig_classes.pdf")
+    plot_classes(headline, args.outdir / "fig_classes.pdf", gene_label="HLA-A")
 
     # ---- 8. per-allele view ---------------------------------------------------
     per_allele, common_alleles = per_allele_view(df, events, min_allele_samples=args.min_allele_samples,
                                                   exclude_alleles=exclude_alleles)
     per_allele.to_csv(args.outdir / "table_per_allele.csv", index=False)
-    plot_per_allele(per_allele, args.outdir)
+    plot_per_allele(per_allele, args.outdir, gene_label="HLA-A")
+
+    # "talk" subset: largest-n alleles union any allele with a nonzero
+    # carrier bar -- the full grid above is unreadable projected on a slide,
+    # this is the same numbers restricted to the panels that actually carry
+    # a story. Panels/alleles are never dropped from the full grid, only
+    # from this separate slide-sized figure.
+    TALK_ALLELES_HLA_A = ["hla_a_02_01", "hla_a_03_01", "hla_a_01_01", "hla_a_24_02",
+                           "hla_a_23_01", "hla_a_30_01"]
+    talk_subset = per_allele[per_allele["Contig_rd"].isin(TALK_ALLELES_HLA_A)]
+    plot_per_allele(talk_subset, args.outdir, gene_label="HLA-A", filename="fig_per_allele_talk.pdf",
+                     title_suffix="\n(talk view: largest-n alleles + any with a nonzero carrier; "
+                                   "full grid in fig_per_allele.pdf)")
 
     # ---- 9. detailed table (many patterns) + FDR --------------------------------
     detail = detailed_table(df, events, min_carriers=args.min_carriers)
@@ -935,7 +1021,7 @@ def main():
     # ---- 10. volcano plot -----------------------------------------------------
     volcano = volcano_data(detail, min_carriers=args.min_carriers)
     volcano.to_csv(args.outdir / "table_volcano.csv", index=False)
-    plot_volcano(volcano, args.outdir, label_n=args.volcano_label_n)
+    plot_volcano(volcano, args.outdir, gene_label="HLA-A", label_n=args.volcano_label_n)
 
     # ---- 11. per-sample event burden --------------------------------------------
     plot_event_burden(counts, args.outdir)

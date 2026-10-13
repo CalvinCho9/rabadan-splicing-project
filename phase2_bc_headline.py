@@ -52,6 +52,16 @@ GENES = {
 # PRESENTATION status differs.
 QUARANTINED = {"HLA-B": True, "HLA-C": False}
 
+# "Talk" subset of the per-allele grid: story-carrying panels only (full grid
+# is still written for every gene as the appendix figure). HLA-C: the
+# Finding-4 real-variable-splicing candidate pair. HLA-B: largest-n alleles
+# union the only two alleles with a nonzero carrier bar at all -- still
+# quarantine-prefixed, audit convenience only, never referenced presented.
+TALK_ALLELES = {
+    "HLA-C": ["hla_c_03_03", "hla_c_03_04"],
+    "HLA-B": ["hla_b_07_02", "hla_b_08_01", "hla_b_35_01", "hla_b_44_02", "hla_b_15_01", "hla_b_27_05"],
+}
+
 
 def gene_tag(gene):
     return gene.replace("-", "_")
@@ -98,7 +108,7 @@ def run_gene(gene, tumor_path, normal_path):
     headline = ab.headline_comparison(df, events_for_headline)
     ab.print_headline_table(headline)
     headline.to_csv(fname("table_headline_classes", "csv"), index=False)
-    ab.plot_classes(headline, fname("fig_classes", "pdf"))
+    ab.plot_classes(headline, fname("fig_classes", "pdf"), gene_label=gene)
 
     # ---- per-allele view ----------------------------------------------------
     # plot_per_allele()/plot_volcano() always write to the FIXED filenames
@@ -115,19 +125,30 @@ def run_gene(gene, tumor_path, normal_path):
     per_allele, common_alleles = ab.per_allele_view(df, events, min_allele_samples=20,
                                                      exclude_alleles=exclude_alleles)
     per_allele.to_csv(fname("table_per_allele", "csv"), index=False)
-    ab.plot_per_allele(per_allele, scratch)
+    ab.plot_per_allele(per_allele, scratch, gene_label=gene)
     scratch_fig = scratch / "fig_per_allele.pdf"
     if scratch_fig.exists():
         scratch_fig.rename(fname("fig_per_allele", "pdf"))
     else:
         print(f"  [{gene}] no alleles meet --min-allele-samples -- no fig_per_allele for this gene")
 
+    # "talk" subset -- same full-grid-is-unreadable-on-a-slide fix as HLA-A's
+    # fig_per_allele_talk.pdf, restricted to this gene's story-carrying panels.
+    talk_alleles = TALK_ALLELES.get(gene, [])
+    talk_subset = per_allele[per_allele["Contig_rd"].isin(talk_alleles)]
+    ab.plot_per_allele(talk_subset, scratch, gene_label=gene, filename="fig_per_allele_talk.pdf",
+                        title_suffix=f"\n(talk view: story-carrying alleles only; full grid in "
+                                      f"{fname('fig_per_allele', 'pdf').name})")
+    scratch_talk = scratch / "fig_per_allele_talk.pdf"
+    if scratch_talk.exists():
+        scratch_talk.rename(fname("fig_per_allele_talk", "pdf"))
+
     # ---- detailed table (FDR) + volcano --------------------------------------
     detail = ab.detailed_table(df, events, min_carriers=3)
     detail.to_csv(fname("results_BRCA_tumor_vs_normal", "csv"), index=False)
     volcano = ab.volcano_data(detail, min_carriers=3)
     volcano.to_csv(fname("table_volcano", "csv"), index=False)
-    ab.plot_volcano(volcano, scratch, label_n=6)
+    ab.plot_volcano(volcano, scratch, gene_label=gene, label_n=6)
     scratch_volcano = scratch / "fig_volcano.pdf"
     if scratch_volcano.exists():
         scratch_volcano.rename(fname("fig_volcano", "pdf"))
